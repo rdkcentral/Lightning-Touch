@@ -196,8 +196,7 @@ export const rotatePoint = (cx, cy, angle, p) => {
     return p;
 };
 
-export const getConfigMap = () => {
-    const automotiveSettings = Settings.get("platform", "automotive");
+export const getConfigMap = (settings) => {
     return [
         "bridgeCloseTimeout",
         "tapDelay",
@@ -212,7 +211,7 @@ export const getConfigMap = () => {
         "viewportOffsetX",
         "viewportOffsetY"
     ].reduce((config, key) => {
-        config.set(key, automotiveSettings[key]);
+        config.set(key, settings[key]);
         return config;
     }, new Map());
 };
