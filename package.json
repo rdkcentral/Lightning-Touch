@@ -1,0 +1,26 @@
+{
+  "name": "@lightningjs/automotive",
+  "version": "1.0.0",
+  "description": "Lightning Automotive Engine",
+  "main": "index.js",
+  "dependencies": {
+    "@lightningjs/sdk": "github:rdkcentral/Lightning-SDK#feature/events-plugin"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mlapps/Lightning-Autmotive.git"
+  },
+  "keywords": [
+    "touch",
+    "automotive"
+  ],
+  "author": "Metrological, Erik Haandrikman <e.haandrikman@metrological.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mlapps/Lightning-Autmotive/issues"
+  },
+  "homepage": "https://github.com/mlapps/Lightning-Autmotive#readme"
+}
