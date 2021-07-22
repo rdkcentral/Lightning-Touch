@@ -37,15 +37,9 @@ export const getSwipe = (recording) => {
 
     if (identified) {
         return {
-            event: `swipe${direction}`,
-            recording
+            type: 'swipe', direction
         };
     } else {
         return false;
     }
-};
-
-
-export const isPotentialPinch = (recording) => {
-    return recording.fingersTouched === 2;
 };

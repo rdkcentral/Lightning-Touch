@@ -25,6 +25,7 @@ export default (event) => {
     let dragStarted  = false;
     let isPinched = false;
     let pinchStartDistance = 0;
+    let analyzed = false;
 
     // register every finger
     for (let i = 0; i < len; i++) {
@@ -221,6 +222,12 @@ export default (event) => {
         },
         get firstFinger(){
             return fingers?.values()?.next()?.value || null;
+        },
+        get analyzed(){
+            return analyzed;
+        },
+        set analyzed(v){
+            analyzed = v;
         }
     };
     return record;

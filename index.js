@@ -241,6 +241,8 @@ export const dispatch = (event, recording) => {
 
 /**
  * Keep dispatching event on that we started the hold / drag on
+ * @todo: do we want to accept false explicit for event bubble?
+ *
  * @param event
  * @param recording
  */
@@ -261,8 +263,9 @@ export const sticky = (event, recording) => {
     }
     if (stickyElements.length) {
         stickyElements.forEach((element) => {
-            if (isFunction(element[event])) {
-                handled = element[event](recording);
+            if (isFunction(element[event]) && !handled) {
+                element[event](recording);
+                handled = true;
             }
         });
     }

@@ -20,6 +20,9 @@ let lastRecording = {};
  * @param recording
  */
 export const analyzeEnded = (recording) => {
+    if (recording.analyzed) {
+        return;
+    }
     if (isTap(recording)) {
         if (recording.fingersTouched === 1) {
             handleTap(recording);
@@ -32,23 +35,32 @@ export const analyzeEnded = (recording) => {
         dispatch('_onLongpress', recording);
     } else {
         // start analyzing as a swipe
-        const analyzed = getSwipe(recording);
+        const result = getSwipe(recording);
+        if (result) {
+            const {type, direction} = result;
+            const touchesEvent = `${type}${recording.fingersTouched}${direction}`;
+            const defaultEvent = `${type}${direction}`;
+            let handled = false;
+            [touchesEvent, defaultEvent].forEach((event) => {
+                if (!handled) {
+                    handled = callEvent(event, recording);
+                }
+            });
 
-        // if we recognized a swipe
-        if (analyzed) {
-            let blocked = false;
-            if (config.get('componentBlockBroadcast')) {
-                blocked = sticky(
-                    analyzed.event, analyzed.recording
-                );
-            }
-            // if the event is not being handled by an touched component
-            // or the function return false explicit broadcast the event
-            if (blocked === false) {
-                Events.broadcast(analyzed.event, analyzed.recording);
+            // if event is not being handled we broadcast the event
+            // for any listener to be handled
+            if (!handled) {
+                Events.broadcast(defaultEvent, recording);
             }
         }
     }
+
+    // flag so it will not be analyzed again
+    recording.analyzed = true;
+};
+
+const callEvent = (event, recording) => {
+    return sticky(event, recording);
 };
 
 const handleTap = (recording) => {
@@ -96,29 +108,29 @@ const isTap = (recording) => {
  * the last straight line it made before touch ended
  * @param finger
  */
-export const findSlope = (finger, axis = 'x')=>{
+export const findSlope = (finger, axis = 'x') => {
     const queue = finger.queue;
     const len = queue.length;
     let last = 0;
     let affected = 0;
 
-    for(let i = 0; i < len - 4; i++){
+    for (let i = 0; i < len - 4; i++) {
         const dis = Math.abs(
             queue[0].position[axis] - queue[i].position[axis]
         );
-        if(dis >= last){
+        if (dis >= last) {
             last = dis;
             affected = i;
-        }else{
+        } else {
             break;
         }
     }
     const duration = queue[0].time - queue[affected].time;
     return {
         duration, distance: last
-    }
+    };
 
-}
+};
 
 
 
