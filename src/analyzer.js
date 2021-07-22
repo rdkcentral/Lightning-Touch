@@ -38,7 +38,7 @@ export const analyzeEnded = (recording) => {
         const result = getSwipe(recording);
         if (result) {
             const {type, direction} = result;
-            const touchesEvent = `${type}${recording.fingersTouched}${direction}`;
+            const touchesEvent = `${type}${recording.fingersTouched}f${direction}`;
             const defaultEvent = `${type}${direction}`;
             let handled = false;
             [touchesEvent, defaultEvent].forEach((event) => {
