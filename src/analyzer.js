@@ -96,13 +96,16 @@ const isTap = (recording) => {
  * the last straight line it made before touch ended
  * @param finger
  */
-export const findStraightLine = (finger)=>{
+export const findSlope = (finger, axis = 'x')=>{
     const queue = finger.queue;
     const len = queue.length;
     let last = 0;
     let affected = 0;
+
     for(let i = 0; i < len - 4; i++){
-        const dis = Math.abs(queue[0].position.x - queue[i].position.x);
+        const dis = Math.abs(
+            queue[0].position[axis] - queue[i].position[axis]
+        );
         if(dis >= last){
             last = dis;
             affected = i;
@@ -110,7 +113,6 @@ export const findStraightLine = (finger)=>{
             break;
         }
     }
-
     const duration = queue[0].time - queue[affected].time;
     return {
         duration, distance: last
