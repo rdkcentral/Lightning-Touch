@@ -8,7 +8,7 @@ import {
     isString,
     distance,
     smoothstep,
-    getConfigMap
+    getConfigMap,
 } from "./helpers";
 
 let application = null;

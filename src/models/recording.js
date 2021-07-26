@@ -23,6 +23,7 @@ export default (event) => {
     let moved = false;
 
     let dragStarted  = false;
+    let pinchStarted = false;
     let isPinched = false;
     let pinchStartDistance = 0;
     let analyzed = false;
@@ -87,7 +88,11 @@ export default (event) => {
         const pinch = getPinch();
 
         if (pinch) {
-            Events.broadcast("pinch", pinch);
+            if(!pinchStarted){
+                sticky('_onPinchStart', record);
+                pinchStarted = true;
+            }
+            sticky('_onPinch', record);
             isPinched = true;
         }
     };
