@@ -8,6 +8,7 @@ export default (event) => {
     const touches = event.touches;
     const fingers = new Map();
     const len = touches.length;
+
     let endtime = Date.now();
     let isTap = false;
     /**
@@ -25,6 +26,7 @@ export default (event) => {
     let dragStarted  = false;
     let pinchStarted = false;
     let isPinched = false;
+    let pinch = null;
     let pinchStartDistance = 0;
     let analyzed = false;
 
@@ -88,11 +90,12 @@ export default (event) => {
         const pinch = getPinch();
 
         if (pinch) {
+            record.pinch = pinch;
             if(!pinchStarted){
-                sticky('_onPinchStart', record, pinch);
+                sticky('_onPinchStart', record);
                 pinchStarted = true;
             }
-            sticky('_onPinch', record, pinch);
+            sticky('_onPinch', record);
             isPinched = true;
         }
     };
@@ -167,8 +170,9 @@ export default (event) => {
             if (isHold) {
                 sticky('_onDragEnd', record);
             }
+
             if (isPinched) {
-                Events.broadcast("pinchEnd", record);
+                sticky('_onPinchEnd', record);
             }
 
         },
@@ -233,6 +237,12 @@ export default (event) => {
         },
         set analyzed(v){
             analyzed = v;
+        },
+        set pinch(v){
+            pinch = v;
+        },
+        get pinch(){
+            return pinch;
         }
     };
     return record;
