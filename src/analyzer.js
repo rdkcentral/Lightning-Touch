@@ -1,5 +1,5 @@
 import {Registry, Events} from "@lightningjs/sdk";
-import {dispatch, config, sticky} from "../index";
+import {dispatch, config, sticky} from "./automotive";
 import {getSwipe} from "./gestures";
 import {distance} from "./helpers";
 

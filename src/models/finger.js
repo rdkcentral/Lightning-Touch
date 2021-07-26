@@ -1,5 +1,5 @@
 import {createVector} from "./index";
-import {offsetX, offsetY} from "../../index";
+import {offsetX, offsetY} from "../automotive";
 
 /**
  * Amount of positions we store in queue

@@ -1,5 +1,4 @@
-import {getApplication} from "../index";
-import {Settings} from "@lightningjs/sdk";
+import {getApplication} from "./automotive";
 import createVector from "./models/vector";
 
 /**

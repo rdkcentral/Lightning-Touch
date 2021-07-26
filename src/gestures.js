@@ -1,4 +1,4 @@
-import {config} from "../index";
+import {config} from "./automotive";
 
 export const getSwipe = (recording) => {
     let identified;

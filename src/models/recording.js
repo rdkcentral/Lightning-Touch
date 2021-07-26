@@ -1,6 +1,6 @@
 import {Registry, Events} from "@lightningjs/sdk";
 import {createFinger, createVector} from "./index";
-import {sticky, config} from "../../index";
+import {sticky, config} from "../automotive";
 import {distance} from "../helpers";
 
 export default (event) => {
