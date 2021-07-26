@@ -89,10 +89,10 @@ export default (event) => {
 
         if (pinch) {
             if(!pinchStarted){
-                sticky('_onPinchStart', record);
+                sticky('_onPinchStart', record, pinch);
                 pinchStarted = true;
             }
-            sticky('_onPinch', record);
+            sticky('_onPinch', record, pinch);
             isPinched = true;
         }
     };
