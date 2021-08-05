@@ -48,9 +48,9 @@ export const getAtPosition = (x, y) => {
         touched.sort((a, b) => {
             // Sort by zIndex and then id
             if (a.zIndex > b.zIndex) {
-                return 1;
-            } else if (a.zIndex < b.zIndex) {
                 return -1;
+            } else if (a.zIndex < b.zIndex) {
+                return 1;
             } else {
                 return a.id > b.id ? 1 : -1;
             }
