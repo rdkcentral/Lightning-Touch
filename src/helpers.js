@@ -44,6 +44,7 @@ export const getAtPosition = (x, y) => {
     const rootElements = getApplication().children;
     const activeElements = findChildren([], rootElements);
     const touched = inRange(activeElements, x, y) || [];
+
     if (touched.length) {
         touched.sort((a, b) => {
             // Sort by zIndex and then id
@@ -52,7 +53,7 @@ export const getAtPosition = (x, y) => {
             } else if (a.zIndex < b.zIndex) {
                 return 1;
             } else {
-                return a.id > b.id ? 1 : -1;
+                return a.id > b.id ? -1 : 1;
             }
         });
         return touched;
