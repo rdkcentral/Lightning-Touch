@@ -37,7 +37,7 @@ export const getSwipe = (recording) => {
 
     if (identified) {
         return {
-            type: 'swipe', direction
+            type: '_onSwipe', direction
         };
     } else {
         return false;

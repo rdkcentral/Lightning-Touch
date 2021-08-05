@@ -47,6 +47,7 @@ export const analyzeEnded = (recording) => {
                 }
             });
         }
+
     }
 
     // flag so it will not be analyzed again
