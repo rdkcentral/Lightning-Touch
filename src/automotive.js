@@ -226,7 +226,7 @@ const setup = (target, app) => {
 
 /**
  * Call event on touched elements
- * @todo: handle explicit false fot bubble
+ * @todo: handle explicit false for bubble
  *
  * @param event
  * @param recording
