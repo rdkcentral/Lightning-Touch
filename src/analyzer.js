@@ -46,12 +46,6 @@ export const analyzeEnded = (recording) => {
                     handled = callEvent(event, recording);
                 }
             });
-
-            // if event is not being handled we broadcast the event
-            // for any listener to be handled
-            if (!handled) {
-                Events.broadcast(defaultEvent, recording);
-            }
         }
     }
 
