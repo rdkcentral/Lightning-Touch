@@ -55,7 +55,7 @@ export const analyzeEnded = (recording) => {
 };
 
 const callEvent = (event, recording) => {
-    return sticky(event, recording);
+    return dispatch(event, recording);
 };
 
 const handleTap = (recording) => {
