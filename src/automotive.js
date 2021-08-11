@@ -78,10 +78,17 @@ let stickyElements = [];
 let lastTouchedElements = [];
 
 /**
- * Events that are currently being blocked
+ * Events in this list will not be allowed to pass-through
  * @type {Set<string>}
  */
-const blockedEvents = new Set();
+const blacklist = new Set();
+
+/**
+ * If this list.size > 0 we only allow those events to pass-through
+ * if size = 0 we allow all events.
+ * @type {Set<string>}
+ */
+const whitelist = new Set();
 
 /**
  * Called when user start touching dashboard touchscreen
@@ -233,7 +240,7 @@ const setup = (target, app) => {
  * @param reset
  */
 export const dispatch = (event, recording) => {
-    if (blockedEvents.has(event)) {
+    if (isBlocked(event)) {
         return;
     }
 
@@ -258,10 +265,8 @@ export const dispatch = (event, recording) => {
  * @param recording
  */
 export const sticky = (event, recording) => {
-    // return true so we prevent unhandled sticky events
-    // from being broadcasted to the app globally
-    if (blockedEvents.has(event)) {
-        return true;
+    if (isBlocked(event)) {
+        return;
     }
 
     let handled = false;
@@ -302,17 +307,12 @@ export const getLastTouchedElements = () => {
 };
 
 /**
- * Block events from being emitted
+ * Prevent events from being emitted
  * from broadcast
  * @param events
  */
 const block = (events = []) => {
-    if (!isArray(events)) {
-        events = [events];
-    }
-    events.forEach(
-        event => blockedEvents.add(event)
-    );
+    return add(blacklist, events);
 };
 
 /**
@@ -321,21 +321,68 @@ const block = (events = []) => {
  * @param events
  */
 const release = (events) => {
-    if (!isArray(events)) {
-        if (isString(events)) {
-            blockedEvents.delete(events);
-            return;
-        } else {
-            events = [events];
-        }
+    return remove(blacklist, events);
+};
+
+/**
+ * Only allow events from this type to be emitted
+ * @param events
+ */
+const lock = (events) => {
+    return add(whitelist, events);
+};
+
+/**
+ * Remove event type from whitelist
+ * @param events
+ */
+const unlock = (events) => {
+    return remove(whitelist, events);
+};
+
+const add = (list, items = []) => {
+    if (!isArray(items)) {
+        items = [items];
     }
-    events.forEach(
-        event => blockedEvents.delete(event)
+    items.forEach(
+        item => list.add(item)
     );
 };
 
+const remove = (list, items = []) => {
+    if (!isArray(items)) {
+        if (isString(items)) {
+            list.delete(items);
+            return;
+        } else {
+            items = [items];
+        }
+    }
+    items.forEach(
+        item => list.delete(item)
+    );
+};
+
+const isBlocked = (event) => {
+    if(whitelist.size){
+        if(!whitelist.has(event)){
+            return true
+        }
+    }
+    return blacklist.has(event);
+};
+
 export default {
-    start: init, block, release, createVector, distance, smoothstep, getHorizontalForce, getVerticalForce
+    start: init,
+    block,
+    release,
+    lock,
+    unlock,
+    createVector,
+    distance,
+    smoothstep,
+    getHorizontalForce,
+    getVerticalForce
 };
 
 
