@@ -1,15 +1,16 @@
 import {createVector} from "./index";
-import {offsetX, offsetY} from "../automotive";
+import {offsetX, offsetY, config} from "../automotive";
 
 /**
  * Amount of positions we store in queue
  * @type {number}
  */
-const touchQueueMaxLength = 70;
 
 export default (data)=>{
+    const startPosition = createVector(
+        data.clientX + offsetX, data.clientY + offsetY
+    );
     let identifier = data.identifier;
-    const startPosition = createVector(data.clientX + offsetX, data.clientY + offsetY);
     let currentPosition = startPosition;
     let delta = createVector(0.0, 0.0);
     let moveRegistered = false;
@@ -44,7 +45,7 @@ export default (data)=>{
         });
 
         // make sure we only hold last touch positions
-        if(touchQueue.length > touchQueueMaxLength){
+        if(touchQueue.length > config.get('touchQueueMaxLength')){
             touchQueue.pop();
         }
     };

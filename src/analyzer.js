@@ -120,6 +120,9 @@ export const getVerticalForce = (finger) => {
 
 
 const calculateForce = ({duration, distance})=>{
+    if(distance === 0 && duration < config.get('maxZeroDistanceDuration')){
+        return config.get('maxForce') || 10;
+    }
     const power = distance / duration;
     return isFinite(power) ? power : 0;
 }

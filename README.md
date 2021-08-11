@@ -423,4 +423,44 @@ Minimal amount of pixel one or more fingers need to travel before it's gets reco
 
 Minimal amount of pixel one or more fingers need to travel before it's gets recognized as a swipe along the y-axis
 
+##### touchQueueMaxLength
+
+Amount of position vectors we store during finger (pointer) movement, a higher number will lead to better precision. 
+Defaults to `70`
+
+##### maxForce
+
+For force calculation (i.e `getHorizontalForce()`) we divide the `distance` a finger has traveled by the 
+`duration` between the first and last `touchQueue` element. Due to duration calculation and the fact that
+a finger needs to make a small movement to be flagged as `moving`, it's possible that we end up with swipe `distace` of `0 pixels`
+and a short duration. In this situation we return the `maxForce`
+
+##### maxZeroDistanceDuration
+
+Sets the `duration` a zero-distance gesture can take to be flagged and return `maxForce`
+
+
+##### example
+
+```js
+const settings = {
+    bridgeCloseTimeout: 110,
+    tapDelay: 120,
+    doubleTapActive: true,
+    beforeDoubleTapDelay: 180,
+    flagAsHoldDelay: 800,
+    doubleTapMaxDistance: 40,
+    externalTouchScreen: false,
+    componentBlockBroadcast: true,
+    swipeXTreshold: 30,
+    swipeYTreshold: 30,
+    viewportOffsetX: 0,
+    viewportOffsetY: 57,
+    touchQueueMaxLength: 80,
+    maxForce: 10,
+    maxZeroDistanceDuration: 50
+}
+```
+
+
 ---
