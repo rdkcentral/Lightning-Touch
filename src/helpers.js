@@ -191,8 +191,6 @@ export const smoothstep = (min, max, value) => {
  * Point to rotated rectangle collision detection
  * @param rw
  * @param rh
- * @param rx
- * @param ry
  * @param angle
  * @param rcx
  * @param rcy

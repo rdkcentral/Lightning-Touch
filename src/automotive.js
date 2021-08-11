@@ -1,6 +1,6 @@
 import {Registry, Log} from "@lightningjs/sdk";
 import {createRecording, createVector} from "./models";
-import {analyzeEnded, resetRecordings} from "./analyzer";
+import {analyzeEnded, resetRecordings, getHorizontalForce, getVerticalForce} from "./analyzer";
 import {
     getAllTouchedElements,
     isFunction,
@@ -335,7 +335,7 @@ const release = (events) => {
 };
 
 export default {
-    start: init, block, release, createVector, distance, smoothstep
+    start: init, block, release, createVector, distance, smoothstep, getHorizontalForce, getVerticalForce
 };
 
 

@@ -99,9 +99,37 @@ const isTap = (recording) => {
 };
 
 /**
+ * @param finger
+ * @returns {{duration, distance}}
+ */
+export const getHorizontalForce = (finger) => {
+    return calculateForce(
+        findSlope(finger, 'x')
+    );
+};
+
+/**
+ * @param finger
+ * @returns {{duration, distance}}
+ */
+export const getVerticalForce = (finger) => {
+    return calculateForce(
+        findSlope(finger, 'y')
+    );
+};
+
+
+const calculateForce = ({duration, distance})=>{
+    const power = distance / duration;
+    return isFinite(power) ? power : 0;
+}
+
+/**
  * Analyses the finger's position queue in search for
  * the last straight line it made before touch ended
  * @param finger
+ * @param axis
+ * @returns {{duration: number, distance: number}}
  */
 export const findSlope = (finger, axis = 'x') => {
     const queue = finger.queue;
