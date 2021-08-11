@@ -10,11 +10,34 @@ Update your project's dependency and run `npm install`
 }
 ```
 
-#### Example Ui implementation
+### Example Ui implementation
 
 https://github.com/mlapps/com.metrological.ui.Automotive
 
-#### Documentation
+### Getting started 
+
+If you want to enrich your app with Automotive touch-support you first import the Library into your app. 
+
+```js
+import {Automotive} from '@lightningjs/automotive'
+```
+
+Next step is to start the automotive engine, in this example we implement it into a Routed App, and `start` it
+right after the component get's attached to the render-tree ( `_setup` lifecycle event)
+
+```js
+
+export default class App extends Router.App {
+    _setup(){
+        Automotive.start(
+            this.application, settings
+        )
+    }
+}
+
+```
+
+### Documentation
 
 This Library provides examples on how to build interactivity for a multi-touch touchscreen. The library
 records and analyzes all fingers and it's movement.
@@ -70,7 +93,7 @@ type Finger = {
 }
 ```
 
-### Touch Gestures
+#### Touch Gestures
 
 When one or more `Finger`'s are touching the screen this library will try to analyze it's intent. This library ships 
 support for the following gestures: 
@@ -156,41 +179,37 @@ _onDrag(recording){ }
 
 When you stop dragging an element
 
-### Special events 
 
-There are a couple of events that the engine will try to invoke on the `touched` `Component` but if they're not being 
-handled by a certain `Component` they will be broadcasted globally to the App so listeners can subscribe to it.
-
-##### swipeLeft
+##### _onSwipeLeft
 
 When one of more fingers perform a swipe to the left (moving along the x-axis where startposition > endposition) 
 
 ```js
-swipeLeft(recording){ }
+_onSwipeLeft(recording){ }
 ```
 
-##### swipeRight
+##### _onSwipeRight
 
 When one of more fingers perform a swipe to the right (moving along the x-axis where startposition < endposition) 
 
 ```js
-swipeRight(recording){ }
+_onSwipeRight(recording){ }
 ```
 
-##### swipeUp
+##### _onSwipeUp
 
 When one of more fingers perform a swipe up (moving along the y-axis where startposition > endposition) 
 
 ```js
-swipeUp(recording){ }
+_onSwipeUp(recording){ }
 ```
 
-##### swipeDown
+##### _onSwipeDown
 
 When one of more fingers perform a swipe up (moving along the y-axis where startposition < endposition) 
 
 ```js
-swipeDown(recording){ }
+_onSwipeDown(recording){ }
 ```
 
 #### Multi-finger swipes
@@ -202,7 +221,7 @@ but only if the `gestures` was performed by 2 fingers.
 To prevent this pattern:
 
 ```js
-swipeLeft(recording){ 
+_onSwipeLeft(recording){ 
     if(recording.fingersTouched === 2){
         // execute some logic
     }
@@ -212,17 +231,32 @@ swipeLeft(recording){
 the library provides an swipe event for multiple finger count:
 `swipe + finger count + direction`
 
-##### swipe2fLeft()
+##### _onSwipe2fLeft()
 
 This will be invoked when 2 fingers perform a swipe left on a certain `Component` (could als be a `Page`)
 
-##### swipe4Up()
+```js
+_onSwipe2fLeft(recording){ }
+```
+
+##### _onSwipe4Up()
 
 This will be invoked when 4 fingers perform a swipe up.
 
-##### swipe8right()
+```js
+_onSwipe4Up(recording){ }
+```
+
+
+##### _onSwipe8right()
 
 This will be invoked when 8 fingers perform a swipe to the right
+
+```js
+_onSwipe8right(recording){ }
+```
+
+#### Invocation order
 
 There is a certain order of invocation; The engine will first to call the multi finger event 
 before falling back to default version. 
@@ -232,7 +266,118 @@ handled by any `Component` it will try to invoke `swipeUp`. This enables you to 
 
 ---
 
-### Platform settings:
+## Available methods
+
+##### start()
+
+Start automotive touch engine. `app` is a reference to a `Lightning.Component` instance
+that will be the `parent` which the children will be tested for collision detection against
+different points.
+
+`config` is a settings object that can hold different [automotive settings](#platform-settings)
+
+```js
+Automotive.start(app, config)
+```
+
+##### block()
+
+Prevent one or more [events](#available-events) from being called on touched `Component`s 
+
+```js
+// block one
+Automotive.block('_onSingleTap')
+
+// block multiple
+Automotive.block(['_onMultiTap', '_onLongpress'])
+```
+
+#### release()
+
+Allow one or more [events](#available-events) to be called again if they're currently blocked.
+
+```js
+// release one
+Automotive.release('_onMultiTap')
+
+// release multiple
+Automotive.release(['_onSingleTap', '_onLongpress'])
+```
+
+##### lock()
+
+Place one or more [events](#available-events) on a `whitelist`. If this list.size > 0 we only allow those events 
+to pass-through, if the list is empty we allow all events again (unless they're blocked)
+
+```js
+// block one
+Automotive.lock('_onDoubleTap')
+
+// block multiple
+Automotive.lock(['_onSwipeLeft', '_onSwipeRight'])
+```
+
+#### unlock()
+
+Remove one or more [events](#available-events) from the `whitelist`. if the list is empty we allow all events again 
+(unless they're blocked)
+
+```js
+// release one
+Automotive.unlock('_onSwipeLeft')
+
+// release multiple
+Automotive.unlock(['_onDoubleTap', '_onSwipeRight'])
+```
+
+#### createVector(x, y)
+
+Will return a new `Vector` instance to do additional vector calculation.
+
+```js
+const center = Automotive.createVector( 960, 540 )
+```
+
+#### distance(v1, v2)
+
+A small helper function that returns the distance between 2 vectors
+
+```js
+const dis = Automotive.distance(finger.start, finger.end);
+```
+
+#### smoothstep(min, max, value)
+
+Perform interpolation between 2 values
+
+```js
+// returns 0.5
+const v = Automotive.smoothstep(0.0, 0.8, 0.4)
+```
+
+#### getHorizontalForce(finger)
+
+Return the force which the finger did during the last swipe in the same direction along the x-axis. 
+by dividing the traveled distance between the swipe duration. For performance reasons
+we only store the last 70 positions per finger.
+
+
+```js
+const force = Automotive.getHorizontalForce(finger);
+```
+
+#### getVerticalForce(finger)
+
+Return the force which the finger did during the last swipe in the same direction along the y-axis. 
+by dividing the traveled distance between the swipe duration. For performance reasons
+we only store the last 70 positions per finger.
+
+
+```js
+const force = Automotive.getVerticalForce(finger);
+```
+
+## Automotive settings:
 
 
 ##### bridgeCloseTimeout
