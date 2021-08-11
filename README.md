@@ -1,5 +1,10 @@
 # AutoMotive Touch Engine
 
+This Library has been build to bring the capabilities of `Lightning` to Automotive Ui's and Apps. This Library will
+track each individual finger and analyses it's intent. Once the analyser recognizes a gesture it tries to dispatch 
+that event on one of the active touched elements. 
+
+
 ### Getting started
 
 Update your project's dependency and run `npm install`
@@ -38,12 +43,6 @@ export default class App extends Router.App {
 ```
 
 ### Documentation
-
-This Library provides examples on how to build interactivity for a multi-touch touchscreen. The library
-records and analyzes all fingers and it's movement.
-
-Once the analyser recognizes a gesture it tries to dispatch that event on one of the active touched elements. De first argument of the function is the `record` instance that holds a lot  of data of the recording
-(startposition / duration / data for every finger etc)
 
 #### Types 
 

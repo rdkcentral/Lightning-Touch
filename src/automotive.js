@@ -233,7 +233,6 @@ const setup = (target, app) => {
 
 /**
  * Call event on touched elements
- * @todo: handle explicit false for bubble
  *
  * @param event
  * @param recording
@@ -246,11 +245,15 @@ export const dispatch = (event, recording) => {
 
     const touched = getAllTouchedElements(recording.fingers);
     if (touched.length) {
-        touched.forEach((element) => {
-            if (isFunction(element[event])) {
-                element[event](recording);
+        for(let i = 0; i < touched.length; i++){
+            if (isFunction(touched[i][event])) {
+                const bubble = touched[i][event](recording);
+                // if false is returned explicitly we let event bubble
+                if(bubble !== false){
+                    break;
+                }
             }
-        });
+        }
         lastTouchedElements = touched;
     }
     // clean up recording
