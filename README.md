@@ -17,111 +17,220 @@ https://github.com/mlapps/com.metrological.ui.Automotive
 #### Documentation
 
 This Library provides examples on how to build interactivity for a multi-touch touchscreen. The library
-records and analyzes all fingers and it's movement ( there seems to be a hard limit in browser that it tacks max 10 fingers)
+records and analyzes all fingers and it's movement.
 
 Once the analyser recognizes a gesture it tries to dispatch that event on one of the active touched elements. De first argument of the function is the `record` instance that holds a lot  of data of the recording
 (startposition / duration / data for every finger etc)
 
+#### Types 
+
+There are 2 main types that provide a lot of information on the started / active and ended touch event. 
+
+##### Record 
+
+Every `touchstart` will start the creation of a new `Record` that will be available and update during the lifespan of 
+the current touch action (press / swipe / drag  pinch etc.)
+
+```js
+type Record = {  
+    startime: number;
+    endtime: number;
+    fingers: Map;
+    fingersTouched: number;
+    duration: number;
+    isTap: boolean;
+    isHold: boolean;
+    moved: boolean;
+    hasFingerMoved: ()=> boolean;
+    startposition: Vector;
+    delta: Vector;
+    firstFinger: Finger;
+    analyzed:boolean;    
+}
+```
+
+##### Finger
+
+This library tracks each individual `Finger` that it pressing the screen. Each `Record` stores a `Map` with data for every finger
+that's currently on the screen and will keep track of their current position. By doing this, the library can make a distinction on
+a `Swipe` with one or multiple fingers. While building your App or Ui you can call `recordInstance.fingers` getter to receive the 
+`Map` with with each `Finger` instance.
+
+
+```js
+type Finger = {
+    moved: boolean;
+    identifier: number;
+    start: Vector;
+    end: Vector;
+    position: Vector;
+    delta: Vector;
+    queue: {position:Vector, time: number}[];
+    pinching: boolean;
+}
+```
+
+### Touch Gestures
+
+When one or more `Finger`'s are touching the screen this library will try to analyze it's intent. This library ships 
+support for the following gestures: 
+
+- Single tap
+- Double tap
+- Multi-finger tap
+- Single longpress
+- Multi-finger longpress
+- Pinch (zoom and rotation)
+- Spread (zoom and rotation)
+- Swipe left
+- Swipe right
+- Swipe up
+- Swipe down
+- Multi-finger directional swipe
+
+This library tries to recognize one (or more) of this gestures when a `Record`ing has ended or when one more `Finger`s 
+are moving across the screen. Once a gesture is recognized the touch ending will search for all the on-screen `Components` 
+that are rendered at the position where one of your fingers is positioned. When collision is detected it will order
+the `Components` by z-index (so highest order first) and try to call a corresponding `Event` on that component. If a `Component` 
+is not handling that specific event it will try to call it on the lower positioned (z-index) `Component`. 
+
+This will enable you to add touch life-cycle events on i.e: a List `Component` but still render the `Items` on a higher level. 
+
 ### Available events
 
-##### _onSingleTap()
+In addition to Lightning's lifecycle events, this Library provide a set of new events that you can attach on your `Component` 
+to enable and listen to `touch` behaviour.
+
+##### _onSingleTap
 
 Will be called when one finger quickly touches this element
 
-##### _onMultiTap()
+```js
+_onSingleTap(recording){ }
+```
+
+##### _onMultiTap
 
 Will be called when mutliple fingers quickly touches this element
 
-##### _onDoubleTap()
+```js
+_onSingleTap(recording){ }
+```
+
+
+##### _onDoubleTap
 
 When one finger quickly double taps the same element
 
+```js
+_onDoubleTap(recording){ }
+```
+
 ##### _onLongpress()
 
-Will be invoked if one or more fingers are pressing this element for < 800ms. For  now the recording data holds data for all the fingers so it could be that 3 fingers are touching 3 individual elements they all receive
+Will be invoked if one or more fingers are pressing this element for < 800ms. For  now the recording data holds data for 
+all the fingers so it could be that 3 fingers are touching 3 individual elements they all receive
+
+```js
+_onLongpress(recording){ }
+```
+
+##### _onDragStart()
+
+Will be invoked when you start dragging an element
+
+```js
+_onDragStart(recording){ }
+```
+
 
 ##### _onDrag()
 
 Will be invoked when you touch an element and start moving your finger
 
+```js
+_onDrag(recording){ }
+```
+
 ##### _onDragEnd()
 
 When you stop dragging an element
 
----
+### Special events 
 
-### Global events:
-
-Beside the local events described above there are a couple of global events your app can Listen to.
-
-This app uses an **unreleased** version of the Lightning-SDK that contains an `Events` plugin that will become part of a future Lightning-SDK release.
-
-It can be imported into you App as follows:
-
-```js
-import { Events } from "@lightningjs/sdk"
-```
-
-In any component where you've imported the `Events`-plugin you can _listen_ to different events _broadcasted_ by the touch functionality.
-
-The `Events.listen`-method accepts 3 arguments, `namespace`, `event` and a `callback`-function.
-
-- `namespace` always needs be `App`
-- `event` can be any of the events described below (i.e `swipeLeft`, `swipeUp`)
-- `callback` needs to be a function that will receive a `recording`-object as it's parameter
+There are a couple of events that the engine will try to invoke on the `touched` `Component` but if they're not being 
+handled by a certain `Component` they will be broadcasted globally to the App so listeners can subscribe to it.
 
 ##### swipeLeft
 
+When one of more fingers perform a swipe to the left (moving along the x-axis where startposition > endposition) 
+
 ```js
-Events.listen('App', 'swipeLeft', (recording) => {
-    const page = Router.getActivePage();
-    page.animation({
-        duration: 2, actions: [
-            {p: 'x', v: {0: 0, 0.1: -1920, 0.8: -1920, 1: 0}}
-        ]
-    }).start();    
-    this.tag("Label").text = `${recording.fingersTouched} FINGERS SWIPE LEFT`;
-});
+swipeLeft(recording){ }
 ```
 
 ##### swipeRight
 
+When one of more fingers perform a swipe to the right (moving along the x-axis where startposition < endposition) 
+
 ```js
-Events.listen('App', 'swipeRight', (recording) => { ... });
+swipeRight(recording){ }
 ```
 
 ##### swipeUp
 
+When one of more fingers perform a swipe up (moving along the y-axis where startposition > endposition) 
+
 ```js
-Events.listen('App', 'swipeUp', (recording) => { ... });
+swipeUp(recording){ }
 ```
 
 ##### swipeDown
 
-```js
-Events.listen('App', 'swipeUp', (recording) => { ... });
-
-```
-
-##### pinch
+When one of more fingers perform a swipe up (moving along the y-axis where startposition < endposition) 
 
 ```js
-Events.listen('App', 'pinch', ({distance, angle}) => { });
-
+swipeDown(recording){ }
 ```
 
-##### pinchEnd
+#### Multi-finger swipes
+
+As noted above, the first `parameter` of the method is the `Record` instance, this will enable you to do some extra
+calculation based on duration / force / amount of fingers. But sometimes you want to listen to (in example) a `swipeLeft`
+but only if the `gestures` was performed by 2 fingers.
+
+To prevent this pattern:
 
 ```js
-Events.listen('App', 'pinchEnd', (recording) => { ... });
-
+swipeLeft(recording){ 
+    if(recording.fingersTouched === 2){
+        // execute some logic
+    }
+}
 ```
 
+the library provides an swipe event for multiple finger count:
+`swipe + finger count + direction`
 
+##### swipe2fLeft()
 
-It's also possible to block the global event by adding the eventname
-as a class member to a component as adding `"componentBlockBroadcast": true` to 
-the platform settings
+This will be invoked when 2 fingers perform a swipe left on a certain `Component` (could als be a `Page`)
+
+##### swipe4Up()
+
+This will be invoked when 4 fingers perform a swipe up.
+
+##### swipe8right()
+
+This will be invoked when 8 fingers perform a swipe to the right
+
+There is a certain order of invocation; The engine will first to call the multi finger event 
+before falling back to default version. 
+
+So if you perform a swipe up with 4 fingers the engine will first try to invoke `swipe4fUp` and if it's not being
+handled by any `Component` it will try to invoke `swipeUp`. This enables you to extract logic for a certain multi-finger gesture.
+
+---
 
 ### Platform settings:
 
@@ -168,3 +277,5 @@ Minimal amount of pixel one or more fingers need to travel before it's gets reco
 ##### swipeYTreshold
 
 Minimal amount of pixel one or more fingers need to travel before it's gets recognized as a swipe along the y-axis
+
+---
