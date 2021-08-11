@@ -40,6 +40,13 @@ const getElementsAtPosition = (fingers, collectAll) => {
     return touched;
 };
 
+/**
+ * Return sorted list of elements that are at a given x / y position
+ * elements are sorted by z-index (DESC) or by creation id (DESC)
+ * @param x
+ * @param y
+ * @returns {Array}
+ */
 export const getAtPosition = (x, y) => {
     const rootElements = getApplication().children;
     const activeElements = findChildren([], rootElements);
@@ -60,23 +67,37 @@ export const getAtPosition = (x, y) => {
     }
 };
 
-const findChildren = (bucket, children) => {
-    let n = children.length;
+/**
+ * Return a flat array of all children that have one of the initial
+ * provided parents as parent
+ * @param bucket
+ * @param parents
+ * @returns {*}
+ */
+const findChildren = (bucket, parents) => {
+    let n = parents.length;
     while (n--) {
-        const child = children[n];
+        const parent = parents[n];
         // only add active children
-        if (child.__active) {
+        if (parent.__active) {
             // potentially slow
             // add collision flag?
-            bucket.push(child);
-            if (child.hasChildren()) {
-                findChildren(bucket, child.children);
+            bucket.push(parent);
+            if (parent.hasChildren()) {
+                findChildren(bucket, parent.children);
             }
         }
     }
     return bucket;
 };
 
+/**
+ * Return list of elements that collide with the given point (x / y)
+ * @param affected
+ * @param x
+ * @param y
+ * @returns {Array}
+ */
 const inRange = (affected, x, y) => {
     let n = affected.length;
     const candidates = [];
@@ -128,16 +149,39 @@ const inRange = (affected, x, y) => {
     return candidates;
 };
 
+/**
+ * Point - rectangle collision detection
+ * @param px
+ * @param py
+ * @param cx
+ * @param cy
+ * @param cw
+ * @param ch
+ * @returns {boolean}
+ */
 const testCollision = (px, py, cx, cy, cw, ch) => {
     return px >= cx && px <= cx + cw && py >= cy && py <= cy + ch;
 };
 
+/**
+ * Calculate distance between 2 vectors
+ * @param v1
+ * @param v2
+ * @returns {number}
+ */
 export const distance = (v1, v2) => {
     const a = v1.x - v2.x;
     const b = v1.y - v2.y;
     return Math.sqrt(a * a + b * b);
 };
 
+/**
+ * Smoothstep interpolation function
+ * @param min
+ * @param max
+ * @param value
+ * @returns {number}
+ */
 export const smoothstep = (min, max, value) => {
     const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
     return x * x * (3 - 2 * x);
@@ -196,6 +240,11 @@ export const rotatePoint = (cx, cy, angle, p) => {
     return p;
 };
 
+/**
+ * Return set of accepted engine flags
+ * @param settings
+ * @returns {*}
+ */
 export const getConfigMap = (settings) => {
     return [
         "bridgeCloseTimeout",
