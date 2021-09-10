@@ -151,7 +151,15 @@ const disableBrowserBehavior = () => {
         // prevent double tap zoom in on chrome
         const element = document.createElement('meta');
         element.name = 'viewport';
-        element.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0';
+        element.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+
+        // prevent element region manipulation
+        document.body.style.touchAction = 'none';
+
+        // prevent window scroll
+        document.body.style.overflow = 'hidden';
+
+
 
         // append meta element
         document.head.appendChild(element);
@@ -221,6 +229,7 @@ const setup = (target, app) => {
 
     ['touchstart', 'touchmove', 'touchend'].forEach((name) => {
         target.addEventListener(name, (event) => {
+            console.log(name, event)
             if (handlers[name]) {
                 if (config.get('externalTouchScreen') && event.sourceCapabilities) {
                     return;
