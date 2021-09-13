@@ -165,6 +165,7 @@ const disableBrowserBehavior = () => {
             document.body.style.position = 'fixed';
             document.body.style.left = "0px";
             document.body.style.top = "0px";
+            document.body.style.webkitUserSelect = 'none'
         }
 
         // append meta element
@@ -235,7 +236,6 @@ const setup = (target, app) => {
 
     ['touchstart', 'touchmove', 'touchend'].forEach((name) => {
         target.addEventListener(name, (event) => {
-            console.log(name, event)
             if (handlers[name]) {
                 if (config.get('externalTouchScreen') && event.sourceCapabilities) {
                     return;
