@@ -153,6 +153,9 @@ const disableBrowserBehavior = () => {
         element.name = 'viewport';
         element.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
 
+        // append meta element
+        document.head.appendChild(element);
+
         // prevent element region manipulation
         document.body.style.touchAction = 'none';
 
@@ -160,16 +163,24 @@ const disableBrowserBehavior = () => {
         document.body.style.overflow = 'hidden';
 
         if(config.get("ipad")){
-            // prevent safari body position issue
-            // on refresh
+            // prevent safari body position issue on refresh
             document.body.style.position = 'fixed';
             document.body.style.left = "0px";
             document.body.style.top = "0px";
+
+            // prevent longpress select
             document.body.style.webkitUserSelect = 'none'
+
+            // fullscreen support on ipad homescreen pin
+            const element = document.createElement('meta');
+            element.name = 'apple-mobile-web-app-capable';
+            element.content = 'yes';
+
+            // append meta element
+            document.head.appendChild(element);
         }
 
-        // append meta element
-        document.head.appendChild(element);
+
     } catch (e) {
         // silent
     }
