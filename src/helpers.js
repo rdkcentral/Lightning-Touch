@@ -256,7 +256,8 @@ export const getConfigMap = (settings) => {
         "swipeXTreshold",
         "swipeYTreshold",
         "viewportOffsetX",
-        "viewportOffsetY"
+        "viewportOffsetY",
+        "ipad"
     ].reduce((config, key) => {
         config.set(key, settings[key]);
         return config;

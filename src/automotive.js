@@ -17,10 +17,10 @@ export let offsetX = 0;
 export let offsetY = 0;
 
 const init = (app, cfg) => {
+    config = getConfigMap(cfg);
+
     disableBrowserBehavior();
     setup(document, app);
-
-    config = getConfigMap(cfg);
 
     offsetX = config.get('viewportOffsetX') * -1 || 0;
     offsetY = config.get('viewportOffsetY') * -1 || 0;
@@ -159,7 +159,13 @@ const disableBrowserBehavior = () => {
         // prevent window scroll
         document.body.style.overflow = 'hidden';
 
-
+        if(config.get("ipad")){
+            // prevent safari body position issue
+            // on refresh
+            document.body.style.position = 'fixed';
+            document.body.style.left = "0px";
+            document.body.style.top = "0px";
+        }
 
         // append meta element
         document.head.appendChild(element);
