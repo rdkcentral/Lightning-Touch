@@ -28,7 +28,9 @@ import {
     distance,
     smoothstep,
     getConfigMap,
+    getLocalPosition,
 } from "./helpers";
+
 
 let application = null;
 export let config = new Map();
@@ -290,8 +292,9 @@ export const dispatch = (event, recording) => {
     const touched = getAllTouchedElements(recording.fingers);
     if (touched.length) {
         for(let i = 0; i < touched.length; i++){
+            const local = getLocalPosition(touched[i], recording);
             if (isFunction(touched[i][event])) {
-                const bubble = touched[i][event](recording);
+                const bubble = touched[i][event](recording, local);
                 // if false is returned explicitly we let event bubble
                 if(bubble !== false){
                     break;

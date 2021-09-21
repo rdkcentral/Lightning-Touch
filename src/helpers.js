@@ -257,6 +257,23 @@ export const rotatePoint = (cx, cy, angle, p) => {
     return p;
 };
 
+export const getLocalPosition = (component, recording) =>{
+    const {core:{renderContext}} = component;
+    const local = new Map();
+    if(isObject(renderContext)){
+        const {px, py} = renderContext;
+        for(const [id, {position}] of recording.fingers.entries()){
+            local.set(id, createVector(
+                position.x - px, position.y - py
+            ));
+        }
+    }
+    return {
+        first: local.values().next().value,
+        all: local
+    };
+}
+
 /**
  * Return set of accepted engine flags
  * @param settings
@@ -294,6 +311,10 @@ export const isArray = v => {
 export const isString = v => {
     return typeof v === 'string';
 };
+
+export const isObject = v => {
+    return typeof v === 'object' && v !== null
+}
 
 
 
