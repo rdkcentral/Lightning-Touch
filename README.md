@@ -54,7 +54,7 @@ Every `touchstart` will start the creation of a new `Record` that will be availa
 the current touch action (press / swipe / drag  pinch etc.)
 
 ```js
-type Record = {  
+Interface Record {  
     startime: number;
     endtime: number;
     fingers: Map;
@@ -80,7 +80,7 @@ a `Swipe` with one or multiple fingers. While building your App or Ui you can ca
 
 
 ```js
-type Finger = {
+Interface Finger {
     moved: boolean;
     identifier: number;
     start: Vector;
@@ -120,15 +120,35 @@ This will enable you to add touch life-cycle events on i.e: a List `Component` b
 
 ### Available events
 
-In addition to Lightning's lifecycle events, this Library provide a set of new events that you can attach on your `Component` 
-to enable and listen to `touch` behaviour.
+In addition to Lightning's lifecycle events, this Library provide a set of new events that you can add to your `Component` 
+to enable and listen to `touch` behaviour. Each `function` will have 2 parameters: 
+
+###### recording
+
+The active `Record` as described above. Important to know that this recording can still be updated if the recording
+has not ended.
+
+###### local
+
+An `Object` that provides that provides position local to the `Component` that has been touched 
+(as the recording only provides world position)
+
+```js
+type Local = {
+    first: Vector;
+    all: Map<fingerId, Vector>;
+}
+```
+
+`first` is a `Vector` with local positions for the first finger that touched the `Component` and `all` holds
+a `Map` with local positions for each finger that's touching the screen.
 
 ##### _onSingleTap
 
 Will be called when one finger quickly touches this element
 
 ```js
-_onSingleTap(recording){ }
+_onSingleTap(recording, local){ }
 ```
 
 ##### _onMultiTap
@@ -136,7 +156,7 @@ _onSingleTap(recording){ }
 Will be called when mutliple fingers quickly touches this element
 
 ```js
-_onSingleTap(recording){ }
+_onSingleTap(recording, local){ }
 ```
 
 
@@ -145,7 +165,7 @@ _onSingleTap(recording){ }
 When one finger quickly double taps the same element
 
 ```js
-_onDoubleTap(recording){ }
+_onDoubleTap(recording, local){ }
 ```
 
 ##### _onLongpress()
@@ -154,7 +174,7 @@ Will be invoked if one or more fingers are pressing this element for < 800ms. Fo
 all the fingers so it could be that 3 fingers are touching 3 individual elements they all receive
 
 ```js
-_onLongpress(recording){ }
+_onLongpress(recording, local){ }
 ```
 
 ##### _onDragStart()
@@ -162,7 +182,7 @@ _onLongpress(recording){ }
 Will be invoked when you start dragging an element
 
 ```js
-_onDragStart(recording){ }
+_onDragStart(recording, local){ }
 ```
 
 
@@ -171,7 +191,7 @@ _onDragStart(recording){ }
 Will be invoked when you touch an element and start moving your finger
 
 ```js
-_onDrag(recording){ }
+_onDrag(recording, local){ }
 ```
 
 ##### _onDragEnd()
@@ -184,7 +204,7 @@ When you stop dragging an element
 When one of more fingers perform a swipe to the left (moving along the x-axis where startposition > endposition) 
 
 ```js
-_onSwipeLeft(recording){ }
+_onSwipeLeft(recording, local){ }
 ```
 
 ##### _onSwipeRight
@@ -192,7 +212,7 @@ _onSwipeLeft(recording){ }
 When one of more fingers perform a swipe to the right (moving along the x-axis where startposition < endposition) 
 
 ```js
-_onSwipeRight(recording){ }
+_onSwipeRight(recording, local){ }
 ```
 
 ##### _onSwipeUp
@@ -200,7 +220,7 @@ _onSwipeRight(recording){ }
 When one of more fingers perform a swipe up (moving along the y-axis where startposition > endposition) 
 
 ```js
-_onSwipeUp(recording){ }
+_onSwipeUp(recording, local){ }
 ```
 
 ##### _onSwipeDown
@@ -208,7 +228,7 @@ _onSwipeUp(recording){ }
 When one of more fingers perform a swipe up (moving along the y-axis where startposition < endposition) 
 
 ```js
-_onSwipeDown(recording){ }
+_onSwipeDown(recording, local){ }
 ```
 
 #### Multi-finger swipes
@@ -235,7 +255,7 @@ the library provides an swipe event for multiple finger count:
 This will be invoked when 2 fingers perform a swipe left on a certain `Component` (could als be a `Page`)
 
 ```js
-_onSwipe2fLeft(recording){ }
+_onSwipe2fLeft(recording, local){ }
 ```
 
 ##### _onSwipe4Up()
@@ -243,7 +263,7 @@ _onSwipe2fLeft(recording){ }
 This will be invoked when 4 fingers perform a swipe up.
 
 ```js
-_onSwipe4Up(recording){ }
+_onSwipe4Up(recording, local){ }
 ```
 
 
@@ -252,7 +272,7 @@ _onSwipe4Up(recording){ }
 This will be invoked when 8 fingers perform a swipe to the right
 
 ```js
-_onSwipe8right(recording){ }
+_onSwipe8right(recording, local){ }
 ```
 
 #### Invocation order
