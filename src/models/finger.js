@@ -18,7 +18,7 @@
  */
 
 import {createVector} from "./index";
-import {offsetX, offsetY, config} from "../automotive";
+import {config} from "../automotive";
 
 /**
  * Amount of positions we store in queue
@@ -27,8 +27,10 @@ import {offsetX, offsetY, config} from "../automotive";
 
 export default (data)=>{
     const startPosition = createVector(
-        data.clientX + offsetX, data.clientY + offsetY
+        data.clientX + config.get('viewportOffsetX'),
+        data.clientY + config.get('viewportOffsetY')
     );
+
     let identifier = data.identifier;
     let currentPosition = startPosition;
     let delta = createVector(0.0, 0.0);
@@ -49,7 +51,10 @@ export default (data)=>{
     const touchQueue = [];
 
     const update = (data) =>{
-        currentPosition = createVector(data.clientX + offsetX, data.clientY + offsetY);
+        currentPosition = createVector(
+            data.clientX + config.get('viewportOffsetX'),
+            data.clientY + config.get('viewportOffsetY')
+        );
         delta = currentPosition.subtract(
             startPosition
         );

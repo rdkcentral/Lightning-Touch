@@ -103,7 +103,7 @@ export default (event) => {
                     dragStarted = true
                 }
                 sticky('_onDrag', record);
-            }, 1.5);
+            }, config.get('dragInterval') || 1.5);
         }
 
         const pinch = getPinch();
