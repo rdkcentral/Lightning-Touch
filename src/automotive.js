@@ -34,17 +34,12 @@ import {
 
 let application = null;
 export let config = new Map();
-export let offsetX = 0;
-export let offsetY = 0;
 
 const init = (app, cfg) => {
     config = getConfigMap(cfg);
 
     disableBrowserBehavior();
     setup(document, app);
-
-    offsetX = config.get('viewportOffsetX') * -1 || 0;
-    offsetY = config.get('viewportOffsetY') * -1 || 0;
 };
 
 /**
@@ -277,6 +272,14 @@ const setup = (target, app) => {
     });
 };
 
+const updateConfig = (k, v) =>{
+    if(config.has(k)){
+        config.set(k, v);
+    }else{
+        Log.warn('Automotive',`unable to update ${k} to ${v}`)
+    }
+}
+
 /**
  * Call event on touched elements
  *
@@ -329,8 +332,9 @@ export const sticky = (event, recording) => {
     }
     if (stickyElements.length) {
         stickyElements.forEach((element) => {
+            const local = getLocalPosition(element, recording);
             if (isFunction(element[event]) && !handled) {
-                element[event](recording);
+                element[event](recording, local);
                 handled = true;
             }
         });
@@ -432,7 +436,8 @@ export default {
     distance,
     smoothstep,
     getHorizontalForce,
-    getVerticalForce
+    getVerticalForce,
+    updateConfig,
 };
 
 
