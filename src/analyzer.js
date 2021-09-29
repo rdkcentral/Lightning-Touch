@@ -39,6 +39,7 @@ let lastRecording = {};
  * @param recording
  */
 export const analyzeEnded = (recording) => {
+    recording.endtime = Date.now();
     if (recording.analyzed) {
         return;
     }

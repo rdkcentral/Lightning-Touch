@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import {Registry, Log} from "@lightningjs/sdk";
+import {Log} from "@lightningjs/sdk";
 import {createRecording, createVector} from "./models";
 import {analyzeEnded, resetRecordings, getHorizontalForce, getVerticalForce} from "./analyzer";
 import {
@@ -116,8 +116,13 @@ const handleTouchStart = (event) => {
     }
     if (isBridgeOpen()) {
         lastTouchStartEvent = event;
-    } else {
-        Log.warn(`Not accepting new finger identifiers as long touchend hasn't fired`);
+    } else if(config.get('syncTouch')) {
+        // list of Touches for every point of contact
+        // which contributed to the event.
+        const changed = event.changedTouches;
+        if (changed.length) {
+            activeRecording.add(changed);
+        }
     }
 };
 
@@ -125,24 +130,30 @@ const handleTouchStart = (event) => {
  * Called for every finger that stopped touching the screen
  * @param event
  */
-const handleTouchEnd = () => {
+const handleTouchEnd = (event) => {
     // if touchend occurs while bridge is still open
     // we create a new recording
     if (isBridgeOpen()) {
         closeBridge();
     }
 
-    Log.info(`touchend`);
-    touchStarted = false;
+    if(config.get('syncTouchRelease')){
+        // list of Touches for every point of contact
+        // which contributed to the event.
+        const changed = event.changedTouches;
+        // list of Touches for every point of contact
+        // currently touching the surface
+        const touches = event.touches;
 
-    // store end time
-    activeRecording.endtime = Date.now();
-
-    // start analyzing
-    analyzeEnded(activeRecording);
-
-    // reset sticky element
-    stickyElements.length = 0;
+        if (touches.length > changed.length) {
+            activeRecording.remove(changed);
+            dispatch('_onFingerRemoved', activeRecording);
+        }else if (changed.length === touches.length) {
+            endRecording();
+        }
+    } else {
+        endRecording();
+    }
 };
 
 /**
@@ -153,6 +164,28 @@ const handleTouchMove = (event) => {
     if (activeRecording.starttime) {
         activeRecording.update(event);
     }
+};
+
+/**
+ * Open bridge for fingers to identify themself
+ */
+const openBridge = () => {
+    timestampTouchStarted = Date.now();
+
+    // flag that first finger has landed
+    touchStarted = true;
+
+    bridgeOpen = true;
+    bridgeTimeoutId = setTimeout(
+        closeBridge, config.get('bridgeCloseTimeout')
+    );
+};
+
+const endRecording = ()=>{
+    stickyElements.length = 0;
+    touchStarted = false;
+
+    analyzeEnded(activeRecording);
 };
 
 
@@ -178,14 +211,14 @@ const disableBrowserBehavior = () => {
         // prevent window scroll
         document.body.style.overflow = 'hidden';
 
-        if(config.get("ipad")){
+        if (config.get("ipad")) {
             // prevent safari body position issue on refresh
             document.body.style.position = 'fixed';
             document.body.style.left = "0px";
             document.body.style.top = "0px";
 
             // prevent longpress select
-            document.body.style.webkitUserSelect = 'none'
+            document.body.style.webkitUserSelect = 'none';
 
             // fullscreen support on ipad homescreen pin
             const element = document.createElement('meta');
@@ -201,24 +234,6 @@ const disableBrowserBehavior = () => {
     }
 };
 
-/**
- * Open bridge for fingers to identify themself
- */
-const openBridge = () => {
-    // store timestamp
-    timestampTouchStarted = Date.now();
-
-    // flag that first finger has landed
-    touchStarted = true;
-
-    // flag bridge open
-    bridgeOpen = true;
-
-    // schedule timeout
-    bridgeTimeoutId = setTimeout(
-        closeBridge, config.get('bridgeCloseTimeout')
-    );
-};
 
 /**
  * close bridge so no new fingers can enter
@@ -272,13 +287,13 @@ const setup = (target, app) => {
     });
 };
 
-const updateConfig = (k, v) =>{
-    if(config.has(k)){
+const updateConfig = (k, v) => {
+    if (config.has(k)) {
         config.set(k, v);
-    }else{
-        Log.warn('Automotive',`unable to update ${k} to ${v}`)
+    } else {
+        Log.warn('Automotive', `unable to update ${k} to ${v}`);
     }
-}
+};
 
 /**
  * Call event on touched elements
@@ -294,12 +309,12 @@ export const dispatch = (event, recording) => {
 
     const touched = getAllTouchedElements(recording.fingers);
     if (touched.length) {
-        for(let i = 0; i < touched.length; i++){
+        for (let i = 0; i < touched.length; i++) {
             const local = getLocalPosition(touched[i], recording);
             if (isFunction(touched[i][event])) {
                 const bubble = touched[i][event](recording, local);
                 // if false is returned explicitly we let event bubble
-                if(bubble !== false){
+                if (bubble !== false) {
                     break;
                 }
             }
@@ -418,9 +433,9 @@ const remove = (list, items = []) => {
 };
 
 const isBlocked = (event) => {
-    if(whitelist.size){
-        if(!whitelist.has(event)){
-            return true
+    if (whitelist.size) {
+        if (!whitelist.has(event)) {
+            return true;
         }
     }
     return blacklist.has(event);

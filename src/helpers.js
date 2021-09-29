@@ -257,12 +257,12 @@ export const rotatePoint = (cx, cy, angle, p) => {
     return p;
 };
 
-export const getLocalPosition = (component, recording) =>{
-    const {core:{renderContext}} = component;
+export const getLocalPosition = (component, recording) => {
+    const {core: {renderContext}} = component;
     const local = new Map();
-    if(isObject(renderContext)){
+    if (isObject(renderContext)) {
         const {px, py} = renderContext;
-        for(const [id, {position}] of recording.fingers.entries()){
+        for (const [id, {position}] of recording.fingers.entries()) {
             local.set(id, createVector(
                 position.x - px, position.y - py
             ));
@@ -272,7 +272,7 @@ export const getLocalPosition = (component, recording) =>{
         first: local.values().next().value,
         all: local
     };
-}
+};
 
 /**
  * Return set of accepted engine flags
@@ -294,7 +294,9 @@ export const getConfigMap = (settings) => {
         "viewportOffsetX",
         "viewportOffsetY",
         "dragInterval",
-        "ipad"
+        "ipad",
+        "syncTouchAdd",
+        "syncTouchRemove"
     ].reduce((config, key) => {
         config.set(key, settings[key]);
         return config;
@@ -314,8 +316,8 @@ export const isString = v => {
 };
 
 export const isObject = v => {
-    return typeof v === 'object' && v !== null
-}
+    return typeof v === 'object' && v !== null;
+};
 
 
 

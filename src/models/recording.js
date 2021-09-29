@@ -19,7 +19,7 @@
 
 import {Registry} from "@lightningjs/sdk";
 import {createFinger, createVector} from "./index";
-import {sticky, config} from "../automotive";
+import {sticky, dispatch, config} from "../automotive";
 import {distance} from "../helpers";
 
 export default (event) => {
@@ -42,7 +42,7 @@ export default (event) => {
      */
     let moved = false;
 
-    let dragStarted  = false;
+    let dragStarted = false;
     let pinchStarted = false;
     let isPinched = false;
     let pinch = null;
@@ -63,9 +63,9 @@ export default (event) => {
             isHold = true;
             Registry.setInterval(() => {
                 endtime = Date.now();
-                if(!dragStarted){
+                if (!dragStarted) {
                     sticky('_onDragStart', record);
-                    dragStarted = true
+                    dragStarted = true;
                 }
                 sticky('_onDrag', record);
             }, 1);
@@ -98,9 +98,9 @@ export default (event) => {
             Registry.clearTimeouts();
             Registry.setInterval(() => {
                 endtime = Date.now();
-                if(!dragStarted){
+                if (!dragStarted) {
                     sticky('_onDragStart', record);
-                    dragStarted = true
+                    dragStarted = true;
                 }
                 sticky('_onDrag', record);
             }, config.get('dragInterval') || 1.5);
@@ -110,7 +110,7 @@ export default (event) => {
 
         if (pinch) {
             record.pinch = pinch;
-            if(!pinchStarted){
+            if (!pinchStarted) {
                 sticky('_onPinchStart', record);
                 pinchStarted = true;
             }
@@ -156,7 +156,7 @@ export default (event) => {
         const rDis = cDis - sDis;
 
         if (Math.abs(rDis) > 30 && f1Dis > f1hDis && f2Dis > f2hDis) {
-            if(!pinchStartDistance){
+            if (!pinchStartDistance) {
                 pinchStartDistance = rDis;
             }
             const angle = Math.atan2(f1p.y - f2p.y, f1p.x - f2p.x);
@@ -248,20 +248,36 @@ export default (event) => {
                 return createVector(0.0, 0.0);
             }
         },
-        get firstFinger(){
+        get firstFinger() {
             return fingers?.values()?.next()?.value || null;
         },
-        get analyzed(){
+        get analyzed() {
             return analyzed;
         },
-        set analyzed(v){
+        set analyzed(v) {
             analyzed = v;
         },
-        set pinch(v){
+        set pinch(v) {
             pinch = v;
         },
-        get pinch(){
+        get pinch() {
             return pinch;
+        },
+        add(touches) {
+            const len = touches.length;
+            for (let i = 0; i < len; i++) {
+                const finger = createFinger(touches.item(i));
+                fingers.set(finger.identifier, finger);
+                dispatch("_onFingerAdded", record);
+            }
+        },
+        remove(touches) {
+            const len = touches.length;
+            for (let i = 0; i < len; i++) {
+                const {identifier} = touches.item(i);
+                fingers.delete(identifier);
+                dispatch("_onFingerRemoved", record);
+            }
         }
     };
     return record;
