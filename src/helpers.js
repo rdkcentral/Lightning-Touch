@@ -295,8 +295,8 @@ export const getConfigMap = (settings) => {
         "viewportOffsetY",
         "dragInterval",
         "ipad",
-        "syncTouchAdd",
-        "syncTouchRemove"
+        "syncTouch",
+        "syncTouchRelease"
     ].reduce((config, key) => {
         config.set(key, settings[key]);
         return config;
