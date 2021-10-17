@@ -44,6 +44,10 @@ export const getAllTouchedElements = (fingers) => {
  * @returns {Array}
  */
 const getElementsAtPosition = (fingers, collectAll) => {
+    if(!isMap(fingers)){
+        fingers = new Map([['0',fingers]]);
+    }
+
     const touched = [];
     for (let finger of fingers.values()) {
         const collection = getAtPosition(finger.start.x, finger.start.y);
@@ -257,12 +261,16 @@ export const rotatePoint = (cx, cy, angle, p) => {
     return p;
 };
 
-export const getLocalPosition = (component, recording) => {
+export const getLocalPosition = (component, fingers) => {
+    if(!isMap(fingers)){
+        fingers = new Map([['0',fingers]]);
+    }
+
     const {core: {renderContext}} = component;
     const local = new Map();
     if (isObject(renderContext)) {
         const {px, py} = renderContext;
-        for (const [id, {position}] of recording.fingers.entries()) {
+        for (const [id, {position}] of fingers.entries()) {
             local.set(id, createVector(
                 position.x - px, position.y - py
             ));
@@ -319,5 +327,8 @@ export const isObject = v => {
     return typeof v === 'object' && v !== null;
 };
 
+export const isMap = (v)=>{
+    return v instanceof Map;
+}
 
 

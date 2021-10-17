@@ -18,7 +18,7 @@
  */
 
 import {Log} from "@lightningjs/sdk";
-import {createRecording, createVector} from "./models";
+import {createFinger, createRecording, createVector} from "./models";
 import {analyzeEnded, resetRecordings, getHorizontalForce, getVerticalForce} from "./analyzer";
 import {
     getAllTouchedElements,
@@ -28,7 +28,7 @@ import {
     distance,
     smoothstep,
     getConfigMap,
-    getLocalPosition,
+    getLocalPosition, getTouchedElements,
 } from "./helpers";
 
 
@@ -82,6 +82,12 @@ let timestampTouchStarted = 0;
 let activeRecording = {};
 
 /**
+ * Recordings per textarea
+ * @type {Map<any, any>}
+ */
+const recordings = new Map();
+
+/**
  * The elements that the user is holding / dragging
  * @type {Array}
  */
@@ -111,12 +117,33 @@ const whitelist = new Set();
  * @param event
  */
 const handleTouchStart = (event) => {
+    const {changedTouches} = event;
+
+    // to prevent the need to wait for a recording to close
+    // or a gestures that start emitting events we always
+    // call onTouchStart event on the elements we collide with on start.
+    // this provide the possibility to do a quick visual response.
+    if (changedTouches.length) {
+        const finger = createFinger(changedTouches[0]);
+        const touched = getAllTouchedElements(finger);
+        if (touched.length) {
+            for (let i = 0; i < touched.length; i++) {
+                const element = touched[i];
+                if (isFunction(element['_onTouchStart'])) {
+                    element['_onTouchStart'](
+                        getLocalPosition(element, finger)
+                    );
+                }
+            }
+        }
+    }
+
     if (!isTouchStarted()) {
         openBridge();
     }
     if (isBridgeOpen()) {
         lastTouchStartEvent = event;
-    } else if(config.get('syncTouch')) {
+    } else if (config.get('syncTouch')) {
         // list of Touches for every point of contact
         // which contributed to the event.
         const changed = event.changedTouches;
@@ -137,7 +164,7 @@ const handleTouchEnd = (event) => {
         closeBridge();
     }
 
-    if(config.get('syncTouchRelease')){
+    if (config.get('syncTouchRelease')) {
         // list of Touches for every point of contact
         // which contributed to the event.
         const changed = event.changedTouches;
@@ -148,7 +175,7 @@ const handleTouchEnd = (event) => {
         if (touches.length > changed.length) {
             activeRecording.remove(changed);
             dispatch('_onFingerRemoved', activeRecording);
-        }else if (changed.length === touches.length) {
+        } else if (changed.length === touches.length) {
             endRecording();
         }
     } else {
@@ -181,11 +208,11 @@ const openBridge = () => {
     );
 };
 
-const endRecording = ()=>{
+const endRecording = () => {
+    analyzeEnded(activeRecording);
+
     stickyElements.length = 0;
     touchStarted = false;
-
-    analyzeEnded(activeRecording);
 };
 
 
@@ -240,8 +267,11 @@ const disableBrowserBehavior = () => {
  */
 const closeBridge = () => {
     bridgeOpen = false;
+
     // start new recording session
-    activeRecording = startRecording(lastTouchStartEvent);
+    activeRecording = startRecording(
+        lastTouchStartEvent
+    );
 };
 
 /**
@@ -297,10 +327,9 @@ const updateConfig = (k, v) => {
 
 /**
  * Call event on touched elements
- *
  * @param event
  * @param recording
- * @param reset
+ * @return {*}
  */
 export const dispatch = (event, recording) => {
     if (isBlocked(event)) {
@@ -308,11 +337,16 @@ export const dispatch = (event, recording) => {
     }
 
     const touched = getAllTouchedElements(recording.fingers);
+    const handled = [];
+
     if (touched.length) {
         for (let i = 0; i < touched.length; i++) {
-            const local = getLocalPosition(touched[i], recording);
+            const element = touched[i];
+            const local = getLocalPosition(element, recording.fingers);
             if (isFunction(touched[i][event])) {
                 const bubble = touched[i][event](recording, local);
+                handled.push(element);
+
                 // if false is returned explicitly we let event bubble
                 if (bubble !== false) {
                     break;
@@ -347,7 +381,7 @@ export const sticky = (event, recording) => {
     }
     if (stickyElements.length) {
         stickyElements.forEach((element) => {
-            const local = getLocalPosition(element, recording);
+            const local = getLocalPosition(element, recording.fingers);
             if (isFunction(element[event]) && !handled) {
                 element[event](recording, local);
                 handled = true;
