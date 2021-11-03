@@ -18,7 +18,7 @@
  */
 
 import {getApplication} from "./automotive";
-import createVector from "./models/vector";
+import {createVector} from "./models";
 
 /**
  * Return element with the highest zIndex for a map of fingers
@@ -43,7 +43,7 @@ export const getAllTouchedElements = (fingers) => {
  * @param collectAll
  * @returns {Array}
  */
-const getElementsAtPosition = (fingers, collectAll) => {
+export const getElementsAtPosition = (fingers, collectAll) => {
     if(!isMap(fingers)){
         fingers = new Map([['0',fingers]]);
     }
