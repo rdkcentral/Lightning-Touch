@@ -19,7 +19,16 @@
 
 import {Log} from "@lightningjs/sdk";
 import {createFinger, createRecording, createVector} from "./models";
-import {analyzeEnded, resetRecordings, getHorizontalForce, getVerticalForce} from "./analyzer";
+import {analyze, resetRecordings, getHorizontalForce, getVerticalForce} from "./analyzer";
+import {
+    addRecording,
+    hasRecording,
+    getRecording,
+    addFinger,
+    getAreaByFingerId,
+    removeFinger,
+    getFingersOnArea, removeRecording
+} from "./recording";
 import {
     getAllTouchedElements,
     isFunction,
@@ -28,7 +37,7 @@ import {
     distance,
     smoothstep,
     getConfigMap,
-    getLocalPosition, getTouchedElements,
+    getLocalPosition
 } from "./helpers";
 
 
@@ -82,12 +91,6 @@ let timestampTouchStarted = 0;
 let activeRecording = {};
 
 /**
- * Recordings per textarea
- * @type {Map<any, any>}
- */
-const recordings = new Map();
-
-/**
  * The elements that the user is holding / dragging
  * @type {Array}
  */
@@ -115,106 +118,120 @@ const whitelist = new Set();
 /**
  * Called when user start touching dashboard touchscreen
  * @param event
+ * @todo: call _onTouchStart() on every element
+ *  element['_onTouchStart'](
+ *       getLocalPosition(element, finger)
+ *  );
  */
 const handleTouchStart = (event) => {
-    const {changedTouches} = event;
-
-    // to prevent the need to wait for a recording to close
-    // or a gestures that start emitting events we always
-    // call onTouchStart event on the elements we collide with on start.
-    // this provide the possibility to do a quick visual response.
-    if (changedTouches.length) {
-        const finger = createFinger(changedTouches[0]);
-        const touched = getAllTouchedElements(finger);
-        if (touched.length) {
-            for (let i = 0; i < touched.length; i++) {
-                const element = touched[i];
-                if (isFunction(element['_onTouchStart'])) {
-                    element['_onTouchStart'](
-                        getLocalPosition(element, finger)
-                    );
-                }
-            }
-        }
+    const changed = event.changedTouches;
+    if (!changed.length) {
+        return;
     }
 
-    if (!isTouchStarted()) {
-        openBridge();
-    }
-    if (isBridgeOpen()) {
-        lastTouchStartEvent = event;
-    } else if (config.get('syncTouch')) {
-        // list of Touches for every point of contact
-        // which contributed to the event.
-        const changed = event.changedTouches;
-        if (changed.length) {
-            activeRecording.add(changed);
+    let added = false;
+
+    const finger = createFinger(changed[0]);
+    const areaId = getTouchAreaId(findTouchArea(finger));
+
+    // if we there is an active recording for this area
+    if (hasRecording(areaId)) {
+        const recording = getRecording(areaId);
+        if (config.get('syncTouch') || recording.isBridgeOpen()) {
+            recording.add(finger);
+            added = true;
         }
+    } else {
+        addRecording(
+            areaId, createRecording(event, areaId)
+        );
+        added = true;
+    }
+    if (added) {
+        finger.area = areaId;
+        addFinger(finger.identifier, areaId);
     }
 };
+
+
+/**
+ * Handle move even for every changed finger
+ * @param event
+ */
+const handleTouchMove = (event) => {
+    const changed = event.changedTouches;
+    if (!changed.length) {
+        return;
+    }
+
+    // @todo: iterate over changed touches if multiple can initiate the same event
+    const touch = changed[0];
+    const areaId = getAreaByFingerId(touch.identifier);
+
+    if (hasRecording(areaId)) {
+        const recording = getRecording(areaId);
+        recording.update(changed);
+    }
+};
+
 
 /**
  * Called for every finger that stopped touching the screen
  * @param event
  */
 const handleTouchEnd = (event) => {
-    // if touchend occurs while bridge is still open
-    // we create a new recording
-    if (isBridgeOpen()) {
-        closeBridge();
+    const changed = event.changedTouches;
+    if (!changed.length) {
+        return;
     }
 
-    if (config.get('syncTouchRelease')) {
-        // list of Touches for every point of contact
-        // which contributed to the event.
-        const changed = event.changedTouches;
-        // list of Touches for every point of contact
-        // currently touching the surface
-        const touches = event.touches;
+    const touch = changed[0];
+    const areaId = getAreaByFingerId(touch.identifier);
 
-        if (touches.length > changed.length) {
-            activeRecording.remove(changed);
-            dispatch('_onFingerRemoved', activeRecording);
-        } else if (changed.length === touches.length) {
-            endRecording();
+    if (hasRecording(areaId)) {
+        const recording = getRecording(areaId);
+
+        removeFinger(touch.identifier);
+        dispatch('_onFingerRemoved', recording);
+
+        if (getFingersOnArea(areaId).length === 0) {
+            removeRecording(areaId);
+            analyze(recording);
+        }else if(config.get('syncTouchRelease')){
+            recording.remove(touch.identifier)
         }
-    } else {
-        endRecording();
     }
 };
 
 /**
- * Called for every move the n amount of fingers do on screen
- * @param event
+ * Find all touchareas where the finger is colliding withgtgbg
+ * @param finger
+ * @return {*[]}
  */
-const handleTouchMove = (event) => {
-    if (activeRecording.starttime) {
-        activeRecording.update(event);
+const findTouchArea = (finger) => {
+    return getAllTouchedElements(
+        finger
+    ).filter((el) => {
+        // prevent App Component (added by bootstrapper) to
+        // end up on top of the touchlist
+        return el.ref !== "App" && el.constructor.isTouchArea;
+    }).sort((a, b) => {
+        if (a.zIndex > b.zIndex) {
+            return -1;
+        } else if (a.zIndex < b.zIndex) {
+            return 1;
+        } else {
+            return a.id > b.id ? -1 : 1;
+        }
+    });
+};
+
+const getTouchAreaId = (areas) => {
+    if (areas.length) {
+        return areas[0].id;
     }
+    return -1;
 };
-
-/**
- * Open bridge for fingers to identify themself
- */
-const openBridge = () => {
-    timestampTouchStarted = Date.now();
-
-    // flag that first finger has landed
-    touchStarted = true;
-
-    bridgeOpen = true;
-    bridgeTimeoutId = setTimeout(
-        closeBridge, config.get('bridgeCloseTimeout')
-    );
-};
-
-const endRecording = () => {
-    analyzeEnded(activeRecording);
-
-    stickyElements.length = 0;
-    touchStarted = false;
-};
-
 
 const disableBrowserBehavior = () => {
     try {
@@ -265,14 +282,15 @@ const disableBrowserBehavior = () => {
 /**
  * close bridge so no new fingers can enter
  */
-const closeBridge = () => {
-    bridgeOpen = false;
+const
+    closeBridge = () => {
+        bridgeOpen = false;
 
-    // start new recording session
-    activeRecording = startRecording(
-        lastTouchStartEvent
-    );
-};
+        // start new recording session
+        activeRecording = startRecording(
+            lastTouchStartEvent
+        );
+    };
 
 /**
  * Returns a new recording session
@@ -308,6 +326,7 @@ const setup = (target, app) => {
     ['touchstart', 'touchmove', 'touchend'].forEach((name) => {
         target.addEventListener(name, (event) => {
             if (handlers[name]) {
+                // prevent double event for beetronics on mac
                 if (config.get('externalTouchScreen') && event.sourceCapabilities) {
                     return;
                 }

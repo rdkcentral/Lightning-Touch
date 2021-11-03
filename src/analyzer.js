@@ -38,7 +38,11 @@ let lastRecording = {};
  * Analyze a recording that has ended
  * @param recording
  */
-export const analyzeEnded = (recording) => {
+export const analyze = (recording) => {
+    if(recording.isBridgeOpen()){
+        recording.close();
+    }
+
     recording.endtime = Date.now();
     if (recording.analyzed) {
         return;
@@ -67,7 +71,6 @@ export const analyzeEnded = (recording) => {
                 }
             });
         }
-
     }
 
     // flag so it will not be analyzed again
