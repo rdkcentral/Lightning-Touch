@@ -36,6 +36,7 @@ export default (data)=>{
     let delta = createVector(0.0, 0.0);
     let moveRegistered = false;
     let moved = false;
+    let areaId;
 
     /**
      * flag if finger is part of pinching gesture
@@ -99,6 +100,9 @@ export default (data)=>{
         },
         get pinching(){
             return pinching;
+        },
+        set areaId(v){
+            areaId = v;
         }
     }
 }
