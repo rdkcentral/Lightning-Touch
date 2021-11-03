@@ -22,7 +22,9 @@ import {createFinger, createVector} from "./index";
 import {sticky, dispatch, config} from "../automotive";
 import {distance} from "../helpers";
 
-export default (event) => {
+let id = 1;
+
+export default (event, areaId) => {
     const starttime = Date.now();
     const touches = event.changedTouches;
     const fingers = new Map();
@@ -51,6 +53,7 @@ export default (event) => {
     let pinchStartDistance = 0;
     let analyzed = false;
     let bridgeTimeoutId;
+    let identifier = id;
 
     // register every finger
     for (let i = 0; i < len; i++) {
@@ -75,7 +78,7 @@ export default (event) => {
         }
     }, config.get('flagAsHoldDelay'));
 
-    const closeBridge = ()=>{
+    const closeBridge = () => {
         bridgeOpen = false;
     };
 
@@ -269,21 +272,27 @@ export default (event) => {
         get pinch() {
             return pinch;
         },
+        get area() {
+            return areaId;
+        },
         add(finger) {
             fingers.set(finger.identifier, finger);
             dispatch("_onFingerAdded", record);
         },
         remove(identifier) {
-            if(fingers.has(identifier)){
-                fingers.delete(identifier)
+            if (fingers.has(identifier)) {
+                fingers.delete(identifier);
             }
         },
-        isBridgeOpen(){
+        isBridgeOpen() {
             return bridgeOpen;
         },
-        close(){
+        close() {
             clearTimeout(bridgeTimeoutId);
             closeBridge();
+        },
+        get id(){
+            return identifier;
         }
     };
 
@@ -292,6 +301,8 @@ export default (event) => {
     bridgeTimeoutId = setTimeout(
         closeBridge, config.get('bridgeCloseTimeout')
     );
+
+    id+=1;
 
     return record;
 }

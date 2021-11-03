@@ -21,6 +21,7 @@ import {Registry} from "@lightningjs/sdk";
 import {dispatch, config, sticky} from "./automotive";
 import {getSwipe} from "./gestures";
 import {distance} from "./helpers";
+import {getAnalyzed} from "./recording";
 
 /**
  * Timeout id for dispatching onTap on touched screen element
@@ -28,12 +29,6 @@ import {distance} from "./helpers";
  */
 let tapFireTimeoutId = 0;
 
-/**
- * Reference to last recording so we can identify
- * double tap
- * @type {{}}
- */
-let lastRecording = {};
 /**
  * Analyze a recording that has ended
  * @param recording
@@ -52,7 +47,6 @@ export const analyze = (recording) => {
             handleTap(recording);
         } else if (!recording.moved && !recording.isHold) {
             dispatch('_onMultiTap', recording);
-            lastRecording = null;
         }
     } else if (!recording.moved) {
         // if we passed tap delay and we haven't moved
@@ -81,40 +75,40 @@ const callEvent = (event, recording) => {
     return dispatch(event, recording);
 };
 
-const handleTap = (recording) => {
+const handleTap = (rec) => {
     // flag recording as tap
-    recording.isTap = true;
+    rec.isTap = true;
 
     // if the Ui is not using double tap
     // we can dispatch tap event immediately
     if (!config.get('doubleTapActive')) {
-        dispatch('_onSingleTap', recording);
+        dispatch('_onSingleTap', rec);
         return;
     }
 
-    if (lastRecording && lastRecording.isTap) {
+    const prev = getAnalyzed(rec.area);
+    if (prev && prev.isTap && prev.id < rec.id) {
         // test if both taps are close to each other
         const dis = distance(
-            recording.startposition, lastRecording.startposition
+            rec.startposition, prev.startposition
         );
         if (Math.abs(dis) < config.get('doubleTapMaxDistance')) {
             Registry.clearTimeouts();
-            dispatch('_onDoubleTap', recording);
-            recording.isTap = false;
+            dispatch('_onDoubleTap', rec);
+            rec.isTap = false;
         }
     } else {
         // if no new tap is clearing this timeout
         // we emit onSingleTap
         tapFireTimeoutId = Registry.setTimeout(() => {
-            dispatch('_onSingleTap', recording);
-            recording.isTap = false;
+            dispatch('_onSingleTap', rec);
+            rec.isTap = false;
         }, config.get('beforeDoubleTapDelay'));
     }
-    lastRecording = recording;
 };
 
 export const resetRecordings = () => {
-    lastRecording = null;
+
 };
 
 const isTap = (recording) => {

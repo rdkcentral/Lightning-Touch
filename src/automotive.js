@@ -195,8 +195,8 @@ const handleTouchEnd = (event) => {
         dispatch('_onFingerRemoved', recording);
 
         if (getFingersOnArea(areaId).length === 0) {
-            removeRecording(areaId);
             analyze(recording);
+            removeRecording(areaId);
         }else if(config.get('syncTouchRelease')){
             recording.remove(touch.identifier)
         }
