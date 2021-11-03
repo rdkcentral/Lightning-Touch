@@ -24,12 +24,15 @@ import {distance} from "../helpers";
 
 export default (event) => {
     const starttime = Date.now();
-    const touches = event.touches;
+    const touches = event.changedTouches;
     const fingers = new Map();
     const len = touches.length;
 
+
+    let bridgeOpen = true;
     let endtime = Date.now();
     let isTap = false;
+
     /**
      * Is user long holding the screen
      * @type {boolean}
@@ -41,13 +44,13 @@ export default (event) => {
      * @type {boolean}
      */
     let moved = false;
-
     let dragStarted = false;
     let pinchStarted = false;
     let isPinched = false;
     let pinch = null;
     let pinchStartDistance = 0;
     let analyzed = false;
+    let bridgeTimeoutId;
 
     // register every finger
     for (let i = 0; i < len; i++) {
@@ -72,13 +75,16 @@ export default (event) => {
         }
     }, config.get('flagAsHoldDelay'));
 
+    const closeBridge = ()=>{
+        bridgeOpen = false;
+    };
+
     /**
      * Update current with recording with data collected from
      * a touchmove event
      * @param event
      */
-    const update = (event) => {
-        const touches = event.touches;
+    const update = (touches) => {
         const len = touches.length;
 
         for (let i = 0; i < len; i++) {
@@ -263,22 +269,29 @@ export default (event) => {
         get pinch() {
             return pinch;
         },
-        add(touches) {
-            const len = touches.length;
-            for (let i = 0; i < len; i++) {
-                const finger = createFinger(touches.item(i));
-                fingers.set(finger.identifier, finger);
-                dispatch("_onFingerAdded", record);
+        add(finger) {
+            fingers.set(finger.identifier, finger);
+            dispatch("_onFingerAdded", record);
+        },
+        remove(identifier) {
+            if(fingers.has(identifier)){
+                fingers.delete(identifier)
             }
         },
-        remove(touches) {
-            const len = touches.length;
-            for (let i = 0; i < len; i++) {
-                const {identifier} = touches.item(i);
-                fingers.delete(identifier);
-                dispatch("_onFingerRemoved", record);
-            }
+        isBridgeOpen(){
+            return bridgeOpen;
+        },
+        close(){
+            clearTimeout(bridgeTimeoutId);
+            closeBridge();
         }
     };
+
+    // schedule bridge close so the recording
+    // stops accepting new fingers
+    bridgeTimeoutId = setTimeout(
+        closeBridge, config.get('bridgeCloseTimeout')
+    );
+
     return record;
 }
