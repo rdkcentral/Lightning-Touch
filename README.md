@@ -156,7 +156,7 @@ _onSingleTap(recording, local){ }
 Will be called when mutliple fingers quickly touches this element
 
 ```js
-_onSingleTap(recording, local){ }
+_onMultiTap(recording, local){ }
 ```
 
 
@@ -198,6 +198,9 @@ _onDrag(recording, local){ }
 
 When you stop dragging an element
 
+```js
+_onDragEnd(recording, local){ }
+```
 
 ##### _onSwipeLeft
 
