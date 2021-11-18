@@ -43,12 +43,22 @@ export const getAllTouchedElements = (fingers) => {
  * @param collectAll
  * @returns {Array}
  */
-export const getElementsAtPosition = (fingers, collectAll) => {
+export const getElementsAtPosition = (fingers, all) => {
+    const elementSet = getElementsByFinger(fingers, all);
+    const items = [];
+    for(let item of elementSet.values()){
+            items.push(...item);
+    }
+    return items;
+};
+
+export const getElementsByFinger = (fingers, collectAll)=>{
     if(!isMap(fingers)){
         fingers = new Map([['0',fingers]]);
     }
 
     const touched = [];
+    const mapping = new Map();
     for (let finger of fingers.values()) {
         const collection = getAtPosition(finger.start.x, finger.start.y);
         if (collection?.length) {
@@ -59,9 +69,11 @@ export const getElementsAtPosition = (fingers, collectAll) => {
                 touched.push(collection.slice(-1)[0]);
             }
         }
+        mapping.set(finger.identifier, [...touched]);
+        touched.lengh = 0;
     }
-    return touched;
-};
+    return mapping;
+}
 
 /**
  * Return sorted list of elements that are at a given x / y position
