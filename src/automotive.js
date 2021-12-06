@@ -125,6 +125,26 @@ const whitelist = new Set();
  */
 const handleTouchStart = (event) => {
     const changed = event.changedTouches;
+
+    // to prevent the need to wait for a recording to close
+    // or a gestures that start emitting events we always
+    // call onTouchStart event on the elements we collide with on start.
+    // this provide the possibility to do a quick visual response.
+    if (changed.length) {
+        const finger = createFinger(changed[0]);
+        const touched = getAllTouchedElements(finger);
+        if (touched.length) {
+            for (let i = 0; i < touched.length; i++) {
+                const element = touched[i];
+                if (isFunction(element['_onTouchStart'])) {
+                    element['_onTouchStart'](
+                        getLocalPosition(element, finger)
+                    );
+                }
+            }
+        }
+    }
+
     if (!changed.length) {
         return;
     }
