@@ -19,7 +19,7 @@
 
 import {Registry} from "@lightningjs/sdk";
 import {createFinger, createVector} from "./index";
-import {sticky, config} from "../automotive";
+import {sticky, dispatch, config } from "../automotive";
 import {distance} from "../helpers";
 
 export default (event) => {
@@ -64,10 +64,10 @@ export default (event) => {
             Registry.setInterval(() => {
                 endtime = Date.now();
                 if(!dragStarted){
-                    sticky('_onDragStart', record);
+                    dispatch('_onDragStart', record);
                     dragStarted = true
                 }
-                sticky('_onDrag', record);
+                dispatch('_onDrag', record);
             }, 1);
         }
     }, config.get('flagAsHoldDelay'));
@@ -99,10 +99,10 @@ export default (event) => {
             Registry.setInterval(() => {
                 endtime = Date.now();
                 if(!dragStarted){
-                    sticky('_onDragStart', record);
+                    dispatch('_onDragStart', record);
                     dragStarted = true
                 }
-                sticky('_onDrag', record);
+                dispatch('_onDrag', record);
             }, config.get('dragInterval') || 1.5);
         }
 
@@ -187,7 +187,7 @@ export default (event) => {
             Registry.clearIntervals();
 
             if (isHold) {
-                sticky('_onDragEnd', record);
+                dispatch('_onDragEnd', record);
             }
 
             if (isPinched) {
