@@ -215,7 +215,7 @@ const openBridge = () => {
     bridgeOpen = true;
 
     // schedule timeout
-    bridgeTimeoutId = setTimeout(
+    bridgeTimeoutId = Registry.setTimeout(
         closeBridge, config.get('bridgeCloseTimeout')
     );
 };
