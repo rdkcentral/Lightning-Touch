@@ -121,20 +121,21 @@ const inRange = (affected, x, y) => {
     let n = affected.length;
     const candidates = [];
     const stage = getApplication().stage;
-
+    const dpr = stage.getOption('devicePixelRatio');
+    const precision = stage.getRenderPrecision();
+    
     // loop through affected children
     // and perform collision detection
     while (n--) {
         const child = affected[n];
-        const precision = stage.getRenderPrecision();
         const ctx = child.core._worldContext;
 
         const cx = ctx.px * precision;
         const cy = ctx.py * precision;
         const cw = child.finalW * ctx.ta * precision;
         const ch = child.finalH * ctx.td * precision;
-        const rcx = cx + cw / 2;
-        const rcy = cy + ch / 2;
+        const rcx = cx / dpr + cw / dpr / 2;
+        const rcy = cy / dpr + ch / dpr / 2;
 
         let isColliding = false;
 
