@@ -130,12 +130,12 @@ const inRange = (affected, x, y) => {
         const child = affected[n];
         const ctx = child.core._worldContext;
 
-        const cx = ctx.px * precision;
-        const cy = ctx.py * precision;
-        const cw = child.finalW * ctx.ta * precision;
-        const ch = child.finalH * ctx.td * precision;
-        const rcx = cx / dpr + cw / dpr / 2;
-        const rcy = cy / dpr + ch / dpr / 2;
+        const cx = ctx.px * precision / dpr;
+        const cy = ctx.py * precision / dpr;
+        const cw = child.finalW * ctx.ta * precision / dpr;
+        const ch = child.finalH * ctx.td * precision / dpr;
+        const rcx = cx + cw / 2;
+        const rcy = cy + ch / 2;
 
         let isColliding = false;
 
