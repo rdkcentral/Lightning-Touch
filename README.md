@@ -1,8 +1,8 @@
-# AutoMotive Touch Engine
+# Lightning Touch Engine
 
-This Library has been build to bring the capabilities of `Lightning` to Automotive Ui's and Apps. This Library will
-track each individual finger and analyses it's intent. Once the analyser recognizes a gesture it tries to dispatch 
-that event on one of the active touched elements. 
+This Library has been build to bring the capabilities of `Lightning` to Touch Ui's and Apps. This Library will
+track each individual finger and analyses it's intent. Once the analyser recognizes a gesture it tries to dispatch
+that event on one of the active touched elements.
 
 
 ### Getting started
@@ -11,30 +11,30 @@ Update your project's dependency and run `npm install`
 
 ```
 "dependencies": {
-    "@lightningjs/automotive": "git+ssh://git@github.com/mlapps/Lightning-Automotive.git",
+    "@lightningjs/touch": "^2.0.0",
 }
 ```
 
 ### Example Ui implementation
 
-https://github.com/mlapps/com.metrological.ui.Automotive
+https://github.com/rdkcentral/Lightning-Touch
 
 ### Getting started 
 
-If you want to enrich your app with Automotive touch-support you first import the Library into your app. 
+If you want to enrich your app with touch-support you first import the Library into your app.
 
 ```js
-import {Automotive} from '@lightningjs/automotive'
+import {Touch} from '@lightningjs/touch'
 ```
 
-Next step is to start the automotive engine, in this example we implement it into a Routed App, and `start` it
+Next step is to start the Touch engine, in this example we implement it into a Routed App, and `start` it
 right after the component get's attached to the render-tree ( `_setup` lifecycle event)
 
 ```js
 
 export default class App extends Router.App {
     _setup(){
-        Automotive.start(
+        Touch.start(
             this.application, settings
         )
     }
@@ -44,17 +44,17 @@ export default class App extends Router.App {
 
 ### Documentation
 
-#### Types 
+#### Types
 
-There are 2 main types that provide a lot of information on the started / active and ended touch event. 
+There are 2 main types that provide a lot of information on the started / active and ended touch event.
 
-##### Record 
+##### Record
 
-Every `touchstart` will start the creation of a new `Record` that will be available and update during the lifespan of 
+Every `touchstart` will start the creation of a new `Record` that will be available and update during the lifespan of
 the current touch action (press / swipe / drag  pinch etc.)
 
 ```js
-Interface Record {  
+Interface Record {
     startime: number;
     endtime: number;
     fingers: Map;
@@ -67,7 +67,7 @@ Interface Record {
     startposition: Vector;
     delta: Vector;
     firstFinger: Finger;
-    analyzed:boolean;    
+    analyzed:boolean;
 }
 ```
 
@@ -75,7 +75,7 @@ Interface Record {
 
 This library tracks each individual `Finger` that it pressing the screen. Each `Record` stores a `Map` with data for every finger
 that's currently on the screen and will keep track of their current position. By doing this, the library can make a distinction on
-a `Swipe` with one or multiple fingers. While building your App or Ui you can call `recordInstance.fingers` getter to receive the 
+a `Swipe` with one or multiple fingers. While building your App or Ui you can call `recordInstance.fingers` getter to receive the
 `Map` with with each `Finger` instance.
 
 
@@ -94,8 +94,8 @@ Interface Finger {
 
 #### Touch Gestures
 
-When one or more `Finger`'s are touching the screen this library will try to analyze it's intent. This library ships 
-support for the following gestures: 
+When one or more `Finger`'s are touching the screen this library will try to analyze it's intent. This library ships
+support for the following gestures:
 
 - Single tap
 - Double tap
@@ -110,18 +110,18 @@ support for the following gestures:
 - Swipe down
 - Multi-finger directional swipe
 
-This library tries to recognize one (or more) of this gestures when a `Record`ing has ended or when one more `Finger`s 
-are moving across the screen. Once a gesture is recognized the touch ending will search for all the on-screen `Components` 
+This library tries to recognize one (or more) of this gestures when a `Record`ing has ended or when one more `Finger`s
+are moving across the screen. Once a gesture is recognized the touch ending will search for all the on-screen `Components`
 that are rendered at the position where one of your fingers is positioned. When collision is detected it will order
-the `Components` by z-index (so highest order first) and try to call a corresponding `Event` on that component. If a `Component` 
-is not handling that specific event it will try to call it on the lower positioned (z-index) `Component`. 
+the `Components` by z-index (so highest order first) and try to call a corresponding `Event` on that component. If a `Component`
+is not handling that specific event it will try to call it on the lower positioned (z-index) `Component`.
 
-This will enable you to add touch life-cycle events on i.e: a List `Component` but still render the `Items` on a higher level. 
+This will enable you to add touch life-cycle events on i.e: a List `Component` but still render the `Items` on a higher level.
 
 ### Available events
 
-In addition to Lightning's lifecycle events, this Library provide a set of new events that you can add to your `Component` 
-to enable and listen to `touch` behaviour. Each `function` will have 2 parameters: 
+In addition to Lightning's lifecycle events, this Library provide a set of new events that you can add to your `Component`
+to enable and listen to `touch` behaviour. Each `function` will have 2 parameters:
 
 ###### recording
 
@@ -130,7 +130,7 @@ has not ended.
 
 ###### local
 
-An `Object` that provides that provides position local to the `Component` that has been touched 
+An `Object` that provides that provides position local to the `Component` that has been touched
 (as the recording only provides world position)
 
 ```js
@@ -292,26 +292,26 @@ handled by any `Component` it will try to invoke `swipeUp`. This enables you to 
 
 ##### start()
 
-Start automotive touch engine. `app` is a reference to a `Lightning.Component` instance
+Start the touch engine. `app` is a reference to a `Lightning.Component` instance
 that will be the `parent` which the children will be tested for collision detection against
 different points.
 
-`config` is a settings object that can hold different [automotive settings](#platform-settings)
+`config` is a settings object that can hold different [touch settings](#platform-settings)
 
 ```js
-Automotive.start(app, config)
+Touch.start(app, config)
 ```
 
 ##### block()
 
-Prevent one or more [events](#available-events) from being called on touched `Component`s 
+Prevent one or more [events](#available-events) from being called on touched `Component`s
 
 ```js
 // block one
-Automotive.block('_onSingleTap')
+Touch.block('_onSingleTap')
 
 // block multiple
-Automotive.block(['_onMultiTap', '_onLongpress'])
+Touch.block(['_onMultiTap', '_onLongpress'])
 ```
 
 #### release()
@@ -320,10 +320,10 @@ Allow one or more [events](#available-events) to be called again if they're curr
 
 ```js
 // release one
-Automotive.release('_onMultiTap')
+Touch.release('_onMultiTap')
 
 // release multiple
-Automotive.release(['_onSingleTap', '_onLongpress'])
+Touch.release(['_onSingleTap', '_onLongpress'])
 ```
 
 ##### lock()
@@ -333,10 +333,10 @@ to pass-through, if the list is empty we allow all events again (unless they're 
 
 ```js
 // block one
-Automotive.lock('_onDoubleTap')
+Touch.lock('_onDoubleTap')
 
 // block multiple
-Automotive.lock(['_onSwipeLeft', '_onSwipeRight'])
+Touch.lock(['_onSwipeLeft', '_onSwipeRight'])
 ```
 
 #### unlock()
@@ -346,10 +346,10 @@ Remove one or more [events](#available-events) from the `whitelist`. if the list
 
 ```js
 // release one
-Automotive.unlock('_onSwipeLeft')
+Touch.unlock('_onSwipeLeft')
 
 // release multiple
-Automotive.unlock(['_onDoubleTap', '_onSwipeRight'])
+Touch.unlock(['_onDoubleTap', '_onSwipeRight'])
 ```
 
 #### createVector(x, y)
@@ -357,7 +357,7 @@ Automotive.unlock(['_onDoubleTap', '_onSwipeRight'])
 Will return a new `Vector` instance to do additional vector calculation.
 
 ```js
-const center = Automotive.createVector( 960, 540 )
+const center = Touch.createVector( 960, 540 )
 ```
 
 #### distance(v1, v2)
@@ -365,7 +365,7 @@ const center = Automotive.createVector( 960, 540 )
 A small helper function that returns the distance between 2 vectors
 
 ```js
-const dis = Automotive.distance(finger.start, finger.end);
+const dis = Touch.distance(finger.start, finger.end);
 ```
 
 #### smoothstep(min, max, value)
@@ -374,32 +374,32 @@ Perform interpolation between 2 values
 
 ```js
 // returns 0.5
-const v = Automotive.smoothstep(0.0, 0.8, 0.4)
+const v = Touch.smoothstep(0.0, 0.8, 0.4)
 ```
 
 #### getHorizontalForce(finger)
 
-Return the force which the finger did during the last swipe in the same direction along the x-axis. 
+Return the force which the finger did during the last swipe in the same direction along the x-axis.
 by dividing the traveled distance between the swipe duration. For performance reasons
 we only store the last 70 positions per finger.
 
 
 ```js
-const force = Automotive.getHorizontalForce(finger);
+const force = Touch.getHorizontalForce(finger);
 ```
 
 #### getVerticalForce(finger)
 
-Return the force which the finger did during the last swipe in the same direction along the y-axis. 
+Return the force which the finger did during the last swipe in the same direction along the y-axis.
 by dividing the traveled distance between the swipe duration. For performance reasons
 we only store the last 70 positions per finger.
 
 
 ```js
-const force = Automotive.getVerticalForce(finger);
+const force = Touch.getVerticalForce(finger);
 ```
 
-## Automotive settings:
+## Touch settings:
 
 
 ##### bridgeCloseTimeout
@@ -447,12 +447,12 @@ Minimal amount of pixel one or more fingers need to travel before it's gets reco
 
 ##### touchQueueMaxLength
 
-Amount of position vectors we store during finger (pointer) movement, a higher number will lead to better precision. 
+Amount of position vectors we store during finger (pointer) movement, a higher number will lead to better precision.
 Defaults to `70`
 
 ##### maxForce
 
-For force calculation (i.e `getHorizontalForce()`) we divide the `distance` a finger has traveled by the 
+For force calculation (i.e `getHorizontalForce()`) we divide the `distance` a finger has traveled by the
 `duration` between the first and last `touchQueue` element. Due to duration calculation and the fact that
 a finger needs to make a small movement to be flagged as `moving`, it's possible that we end up with swipe `distace` of `0 pixels`
 and a short duration. In this situation we return the `maxForce`

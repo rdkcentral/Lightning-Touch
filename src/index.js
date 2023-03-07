@@ -276,7 +276,7 @@ const updateConfig = (k, v) =>{
     if(config.has(k)){
         config.set(k, v);
     }else{
-        Log.warn('Automotive',`unable to update ${k} to ${v}`)
+        Log.warn('Touch',`unable to update ${k} to ${v}`)
     }
 }
 

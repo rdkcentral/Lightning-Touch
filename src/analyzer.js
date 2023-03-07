@@ -18,7 +18,7 @@
  */
 
 import {Registry} from "@lightningjs/sdk";
-import {dispatch, config, sticky} from "./automotive";
+import {dispatch, config, sticky} from ".";
 import {getSwipe} from "./gestures";
 import {distance} from "./helpers";
 

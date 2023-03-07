@@ -18,7 +18,7 @@
  */
 
 import {createVector} from "./index";
-import {config} from "../automotive";
+import {config} from "..";
 
 /**
  * Amount of positions we store in queue

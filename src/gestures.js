@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import {config} from "./automotive";
+import {config} from ".";
 
 export const getSwipe = (recording) => {
     let identified;
