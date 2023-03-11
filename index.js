@@ -17,4 +17,9 @@
  * limitations under the License.
  */
 
-export {default as Automotive} from "./src/automotive"
+import T from './src/index'
+export const Touch = T;
+
+// This should be removed, is replaced by Touch export
+// but kept here for backwards compatibility
+export const Automotive = T;

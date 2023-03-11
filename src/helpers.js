@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import {getApplication} from "./automotive";
+import {getApplication} from ".";
 import createVector from "./models/vector";
 
 /**
