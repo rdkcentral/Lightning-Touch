@@ -321,8 +321,6 @@ export const sticky = (event, recording) => {
     if (isBlocked(event)) {
         return;
     }
-
-    let handled = false;
     // on first fire after a new recording has started
     // we collect the elements;
     if (!stickyElements.length) {
@@ -331,15 +329,20 @@ export const sticky = (event, recording) => {
         });
     }
     if (stickyElements.length) {
-        stickyElements.forEach((element) => {
-            const local = getLocalPosition(element, recording);
-            if (isFunction(element[event]) && !handled) {
-                element[event](recording, local);
-                handled = true;
+        for (let i = 0; i < stickyElements.length; i++) {
+            const local = getLocalPosition(stickyElements[i], recording);
+            if (isFunction(stickyElements[i][event])) {
+                const bubble = stickyElements[i][event](recording, local);
+                // if false is returned explicitly we let event bubble
+                if (bubble !== false) {
+                    break;
+                }
             }
-        });
+        }
+        lastTouchedElements = stickyElements;
     }
-    return handled;
+    // clean up recording
+    resetRecordings();
 };
 
 export const handlers = {
