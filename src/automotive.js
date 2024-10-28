@@ -322,7 +322,6 @@ export const sticky = (event, recording) => {
         return;
     }
 
-    let handled = false;
     // on first fire after a new recording has started
     // we collect the elements;
     if (!stickyElements.length) {
@@ -331,15 +330,14 @@ export const sticky = (event, recording) => {
         });
     }
     if (stickyElements.length) {
-        stickyElements.forEach((element) => {
-            const local = getLocalPosition(element, recording);
-            if (isFunction(element[event]) && !handled) {
-                element[event](recording, local);
-                handled = true;
+        for (let i = 0; i < stickyElements.length; i++) {
+            const element = stickyElements[i];
+            if (isFunction(element[event])) {
+                const local = getLocalPosition(element, recording);
+                if (element[event](recording, local) !== false) break;
             }
-        });
+        }
     }
-    return handled;
 };
 
 export const handlers = {
