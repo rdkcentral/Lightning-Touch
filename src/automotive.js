@@ -312,7 +312,6 @@ export const dispatch = (event, recording) => {
 
 /**
  * Keep dispatching event on that we started the hold / drag on
- * @todo: do we want to accept false explicit for event bubble?
  *
  * @param event
  * @param recording
